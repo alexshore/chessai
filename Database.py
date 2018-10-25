@@ -177,6 +177,16 @@ def editUserField(Field, NewItem, Username):
 def getUserDetails(Username):
     return command("SELECT * FROM Users WHERE Users.Username = ?", Username)[0][:6]
 
+def viewSecurity(Username):
+    data = command("""
+SELECT Security.Question,
+Users.Answer
+FROM Users
+INNER JOIN Security ON(Users.SID = Security.SecurityID)
+WHERE Users.Username = ?""", Username)[0]
+
+    
+
 def checkPasswordMatch(Username):
     while True:
         Password = getpass()

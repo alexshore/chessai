@@ -10,10 +10,14 @@ from Move import Move
 from Piece import Piece
 from AI import AI
 from InputParser import InputParser
-import random
+import random, os
 
 WHITE = True
 BLACK = False
+
+def consoleClear():
+    os.system('cls')
+    os.system('cls')
 
 def askForPlayerSide():
     playerInput = input(
@@ -56,13 +60,12 @@ def listMoves(board, parser, pawns):
         if len(movesWithPiece[i]) < maxLen:
             for j in range(len(movesWithPiece[i]), maxLen):
                 movesWithPiece[i].append('')
-    columnHeader = "\n|"
+    columnHeader = "|"
     connector = '+'
     for i in range(len(movesWithPiece[0])):
         columnHeader += '{:>7} |'.format(movesWithPiece[0][i][0])
         connector += '-' * 8 + '+'
-    print(columnHeader)
-    print(connector)
+    print('\n' + connector + '\n' + columnHeader + '\n' + connector)
     rows = []
     for i in range(len(movesWithPiece[1])):
         rows.append([])
@@ -74,6 +77,7 @@ def listMoves(board, parser, pawns):
         for each in range(len(rows[i])):
             row += "{:>7} |".format(rows[i][each])
         print(row)
+    print(connector)
     print('\n')
 
 def printMakeMove(move, board):
@@ -114,6 +118,7 @@ def printCommandOptions():
 def startGame(board, playerSide, ai):
     parser = InputParser(board, playerSide)
     while True:
+        consoleClear()
         print(board)
         print()
         if board.isCheckMate():
@@ -156,7 +161,6 @@ def startGame(board, playerSide, ai):
             else:
                 print('Couldn\'t parse input, enter a valid command or move.')
         elif board.currentSide == ai.side:
-            print('AI thinking.')
             move = ai.getBestMove(False)
             move.notation = move.getNotation()
             makeMove(move, board)
