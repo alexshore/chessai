@@ -37,7 +37,7 @@ class Session():
             elif choice == 'e':
                 self.accountMenu()
             else:
-                print('Unable to parse input.')
+                getpass('Unable to parse input. Press enter to try again.')
 
     def printAdminMenu(self):
         self.consoleClear()
@@ -62,7 +62,7 @@ class Session():
                 sure = input('Are you sure? (yN) ')
                 if sure.lower() == 'y':
                     DB.bootDB()
-                    input('Database rebooted. Press enter to continue.')
+                    getpass('Database rebooted. Press enter to continue.')
 
     def printAccountMenu(self):
         self.consoleClear()
@@ -82,6 +82,8 @@ class Session():
                 DB.changePassword(self.username)
             elif menuChoice == 2:
                 DB.viewSecurity(self.username)
+            elif menuChoice == 3:
+                DB.editUser(self.isAdmin, self.username)
 
     def printAdminUserMenu(self):
         self.consoleClear()
@@ -108,7 +110,7 @@ class Session():
                         DB.editUser(True, Username)
                         break
                     else:
-                        input('Invalid username. Press enter to try again.')
+                        getpass('Invalid username. Press enter to try again.')
             elif menuChoice == 3:
                 DB.printAllUsers()
 

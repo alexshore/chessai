@@ -142,54 +142,74 @@ def editUser(isAdmin, Username):
     while True:
         consoleClear()
         printUserDetails(Username)
-        fieldChange = input('\nWhich field would you like to change (case-sensitive): ')
+        fieldChange = input('\nWhich field would you like to change (case-sensitive). Enter \'x\' to return: ')
         consoleClear()
-        NewItem = None
-        if fieldChange == 'Username' and isAdmin:
-            NewItem = getUsername()
+        newItem = None
+        if fieldChange.lower() == 'x':
+            return
+        elif fieldChange == 'Username' and isAdmin:
+            newItem = getUsername()
         elif fieldChange == 'Password':
-            NewItem = getPassword()
+            newItem = getPassword()
         elif fieldChange == 'isAdmin':
-            NewItem = getEditableAdmin() if isAdmin else getIsAdmin()
+            newItem = getEditableAdmin() if isAdmin else getIsAdmin()
         elif fieldChange == 'FirstName':
-            NewItem = input('Firstname: ')
+            newItem = input('Firstname: ')
         elif fieldChange == 'SurName':
-            NewItem = input('Surname: ')
+            newItem = input('Surname: ')
         elif fieldChange == 'Created' and isAdmin:
-            NewItem = getEditableDate()
+            newItem = getEditableDate()
         else:
             retry = input('Invalid field entered. Re-enter? (yN) ')
             if retry.lower() != 'y':
-                input('Returning to menu. Press enter to continue.')
+                getpass('Returning to menu. Press enter to continue.')
                 break
-        if NewItem:
+        if newItem:
             try:
-                editUserField(fieldChange, NewItem, Username)
-                print(f'{fieldChange} changed to {NewItem} for {Username}.')
-                input('Press enter to continue.')
+                editUserField(fieldChange, newItem, Username)
+                print(f'{fieldChange} changed from {getUserField(fieldChange, Username)} to {newItem} for user \'{Username}\'.')
+                getpass('Press enter to continue.')
                 break
             except:
-                input('Something went wrong. Press enter to try again.')
+                getpass('Something went wrong. Press enter to try again.')
 
-def editUserField(Field, NewItem, Username):
-    command("UPDATE Users SET {} = ? WHERE Username = ?".format(Field), NewItem, Username)
+def editUserField(Field, newItem, Username):
+    command("UPDATE Users SET {} = ? WHERE Users.Username = ?".format(Field), newItem, Username)
+
+def getUserField(Field, Username):
+    return command("SELECT Users.{} FROM Users WHERE Users.Username = ?".format(Field), Username)[0][0]
 
 def getUserDetails(Username):
     return command("SELECT * FROM Users WHERE Users.Username = ?", Username)[0][:6]
 
 def viewSecurity(Username):
+    consoleClear()
     data = command("""
 SELECT Security.Question,
 Users.Answer
 FROM Users
-INNER JOIN Security ON(Users.SID = Security.SecurityID)
+INNER JOIN Security ON(Users.SecurityID = Security.SecurityID)
 WHERE Users.Username = ?""", Username)[0]
+    connector = '+' + '-' * 46 + '+' + '-' * 21 + '+'
+    header = f"|{'Question':>45} |{'Answer':>20} |"
+    print(connector + '\n' + header + '\n' + connector)
+    print(f'|{data[0]:>45} |{data[1]:>20} |\n' + connector)
+    while True:
+        edit = input('\nWould you like to edit data? (yN) ')
+        if edit.lower() == 'y':
+            SID, Answer = getSecurity()
+            editUserField('SecurityID', SID, Username)
+            editUserField('Answer', Answer, Username)
+        break
 
-    
+def changePassword(Username):
+    if checkPasswordMatch(Username):
+        newPassword = getPassword()
+        setPass(Username, newPassword)
 
 def checkPasswordMatch(Username):
     while True:
-        Password = getpass()
+        Password = getpass('Old password: ')
         data = command("""
 SELECT Users.Username
 FROM Users
@@ -256,7 +276,7 @@ def getPassword():
         print('Password must contain at least one number.')
         print('Password must not contain spaces.\n')
         while True:
-            Password = getpass()
+            Password = getpass('Password: ')
             if checkPasswordValidity(Password):
                 break
         confirmationPass = getpass('Please confirm password: ')
@@ -264,7 +284,7 @@ def getPassword():
             return Password
         else:
             consoleClear()
-            print('Passwords don\'t match. Try again.\n')
+            getpass('Passwords don\'t match. Press enter to try again.\n')
 
 def getEditableAdmin():
     consoleClear()
@@ -279,7 +299,7 @@ def getIsAdmin():
     while True:
         adminPass = getpass('\nPermission code: ')
         if adminPass == 'yo dawg':
-            input('Correct code, setting as admin. Press enter to continue.')
+            getpass('Correct code, setting as admin. Press enter to continue.')
             return True
         tryAgain = input('\nIncorrect code. Try again? (yN) ')
         if tryAgain.lower() != 'y':
@@ -294,7 +314,7 @@ def getEditableDate():
             Day = input('What day was this account created: ')
             date = dt.date(Year, Month, Day)
         except:
-            input('Invalid time entered. Press enter to try again.')
+            getpass('Invalid time entered. Press enter to try again.')
     return date.strftime('%d/%m%Y')
 
 def getCurrentDate():
@@ -309,7 +329,7 @@ def getSecurity():
             print('{} - {}'.format(data[i][0], data[i][1]))
         SID = int(input('Option: ')[0])
         if SID not in [i for i in range(1, len(data))]:
-            print('\nInvalid choice. Try again.')
+            getpass('\nInvalid choice. Press enter to try again.')
         else:
             break
     Answer = input('Enter answer: ')
@@ -340,12 +360,12 @@ def forgotPassword():
         if checkUsernameExists(Username):
             print(getQuestion(Username))
             while True:
-                Answer = input('Answer: ')
+                Answer = getpass('Answer: ')
                 if Answer == getAnswer(Username):
-                    input('You may now enter a new password. Press enter to continue.')
+                    getpass('You may now enter a new password. Press enter to continue.')
                     newPassword = getPassword()
                     setPass(Username, newPassword)
-                    input('Your password has been changed. Press enter to continue.')
+                    getpass('Your password has been changed. Press enter to continue.')
                     return
                 else:
                     retry = input('Invalid answer. Try again? (yN) ')

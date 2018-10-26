@@ -11,6 +11,7 @@ from Piece import Piece
 from AI import AI
 from InputParser import InputParser
 import random, os
+from getpass import *
 
 WHITE = True
 BLACK = False
@@ -40,6 +41,7 @@ def askForAIDepth():
     return depthInput
 
 def listMoves(board, parser, pawns):
+    consoleClear()
     moves = parser.getLegalMovesWithNotation(board.currentSide)
     movesWithPiece = [[]]
     pieceRep = ''
@@ -79,6 +81,7 @@ def listMoves(board, parser, pawns):
         print(row)
     print(connector)
     print('\n')
+    getpass('Press enter to continue.')
 
 def printMakeMove(move, board):
     print()
@@ -105,6 +108,7 @@ def makeMove(move, board):
     board.makeMove(move)
 
 def printCommandOptions():
+    consoleClear()
     undoOption = 'u - undo last move'
     printMovesOption = 'l - show all moves w/out pawns'
     printAllMovesOption = 'll - show all moves'
@@ -114,6 +118,7 @@ def printCommandOptions():
     options = [undoOption, printMovesOption, randomMoveOption,
                quitOption, moveOption, '', ]
     print('\n'.join(options))
+    getpass('Press enter to continue.')
 
 def startGame(board, playerSide, ai):
     parser = InputParser(board, playerSide)
@@ -124,12 +129,15 @@ def startGame(board, playerSide, ai):
         if board.isCheckMate():
             if board.currentSide == playerSide:
                 print('Checkmate, you lost.')
+                win = True
             else:
                 print('Checkmate! You won!')
+                win = False
+            board.recordMatch(playerSide)
             return
-        if board.isStaleMate():
-            print('Stalemate...')
-            return
+        # if board.isStaleMate():
+        #     print('Stalemate...')
+        #     return
         if board.currentSide == playerSide:
             printPointAdvantage(board)
             move = None
@@ -168,6 +176,7 @@ def startGame(board, playerSide, ai):
                 board.currentSide == playerSide
 
 def main():
+    consoleClear()
     board = Board()
     playerSide = askForPlayerSide()
     print()
