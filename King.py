@@ -1,6 +1,6 @@
-from Piece import Piece
-from Move import Move
 from Coordinate import Coordinate as C
+from Move import Move
+from Piece import Piece
 
 WHITE = True
 BLACK = False
@@ -87,8 +87,10 @@ class King(Piece):
                         not kingSideCastleCheck and \
                         not kingSideRookMoved:
                     move = Move(self, self.position - C(2, 0))
-                    move.specialMovePiece = self.board.pieceAtPosition(kingSideRookPos)
-                    rookMove = Move(move.specialMovePiece, self.position - C(1, 0))
+                    move.specialMovePiece = self.board.pieceAtPosition(
+                        kingSideRookPos)
+                    rookMove = Move(move.specialMovePiece,
+                                    self.position - C(1, 0))
                     move.kingSideCastle = True
                     move.rookMove = rookMove
                     yield move
@@ -96,8 +98,10 @@ class King(Piece):
                         not queenSideCastleCheck and \
                         not queenSideRookMoved:
                     move = Move(self, self.position + C(2, 0))
-                    move.specialMovePiece = self.board.pieceAtPosition(queenSideRookPos)
-                    rookMove = Move(move.specialMovePiece, self.position + C(1, 0))
+                    move.specialMovePiece = self.board.pieceAtPosition(
+                        queenSideRookPos)
+                    rookMove = Move(move.specialMovePiece,
+                                    self.position + C(1, 0))
                     move.queenSideCastle = True
                     move.rookMove = rookMove
                     yield move

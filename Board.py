@@ -1,12 +1,12 @@
-from Pawn import Pawn
-from Rook import Rook
-from Knight import Knight
 from Bishop import Bishop
-from Queen import Queen
-from King import King
-from Move import Move
-from Piece import Piece
 from Coordinate import Coordinate as C
+from King import King
+from Knight import Knight
+from Move import Move
+from Pawn import Pawn
+from Piece import Piece
+from Queen import Queen
+from Rook import Rook
 from termcolor import colored
 
 WHITE = True
@@ -54,7 +54,8 @@ class Board:
             pieceToTake = Rook(self, BLACK, C(1, 7))
             whiteKing = King(self, WHITE, C(4, 0))
             blackKing = King(self, BLACK, C(4, 7))
-            self.pieces.extend([pawnToMove, pawnToPromote, whiteKing, pieceToTake, blackKing])
+            self.pieces.extend(
+                [pawnToMove, pawnToPromote, whiteKing, pieceToTake, blackKing])
 
         elif rookTest:
             whiteRook = Rook(self, WHITE, C(4, 4))
@@ -108,7 +109,8 @@ class Board:
             kingBlack = King(self, BLACK, C(4, 7))
             kingSideRook = Rook(self, WHITE, C(0, 0))
             queenSideRook = Rook(self, WHITE, C(7, 0))
-            self.pieces.extend([kingWhite, kingBlack, kingSideRook, queenSideRook])
+            self.pieces.extend(
+                [kingWhite, kingBlack, kingSideRook, queenSideRook])
 
     def __str__(self):
         return self.wrapStringRep(self.makeStringRep(self.pieces))
@@ -155,7 +157,7 @@ class Board:
                 self.addPieceToPosition(pieceTaken, lastMove.newPos)
                 self.pieces.append(pieceTaken)
             pieceToMoveBack.movesMade -= 1
-
+        self.movesMade -= 1
         self.currentSide = not self.currentSide
 
     def isCheckMate(self):
@@ -201,8 +203,8 @@ class Board:
 
     def wrapStringRep(self, stringRep):
         sRep = '\n'.join(
-            ['   a b c d e f g h   ', ' ' * 21] +
-            ['%d  %s  %d' % (8 - r, s.strip(), 8 - r)
+            ['   a b c d e f g h   ', ' ' * 21]
+            + ['%d  %s  %d' % (8 - r, s.strip(), 8 - r)
              for r, s in enumerate(stringRep.split('\n'))] +
             [' ' * 21, '   a b c d e f g h   ']
         ).rstrip()
@@ -268,7 +270,6 @@ class Board:
                 self.pieces.remove(move.pieceToCapture)
             self.pieces.append(move.specialMovePiece)
 
-
             if move.piece.side == WHITE:
                 self.points += move.specialMovePiece.value - 1
             if move.piece.side == BLACK:
@@ -307,7 +308,7 @@ class Board:
 
     def getPointAdvantageOfSide(self, side):
         pointAdvantage = self.getPointValueOfSide(side) - \
-                         self.getPointValueOfSide(not side)
+            self.getPointValueOfSide(not side)
         return pointAdvantage
 
     def getAllMovesUnfiltered(self, side, includeKing=True):

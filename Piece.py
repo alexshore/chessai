@@ -63,5 +63,6 @@ class Piece:
                     return
 
     def copy(self):
-        cpy = self.__class__(self.board, self.side, self.position, movesMade=self.movesMade)
+        cpy = self.__class__(self.board, self.side,
+                             self.position, movesMade=self.movesMade)
         return cpy

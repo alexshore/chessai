@@ -1,5 +1,9 @@
-import Game, os, Database as DB
+import os
+
+import Database as DB
+import Game
 from termcolor import colored as c
+
 
 class Session():
 
@@ -105,7 +109,8 @@ class Session():
                 while True:
                     self.consoleClear()
                     DB.printAllUsers()
-                    Username = input('\nWhich user would you like to edit? (case-sensitive) ')
+                    Username = input(
+                        '\nWhich user would you like to edit? (case-sensitive) ')
                     if DB.checkUsernameExists(Username):
                         DB.editUser(True, Username)
                         break
@@ -113,6 +118,7 @@ class Session():
                         getpass('Invalid username. Press enter to try again.')
             elif menuChoice == 3:
                 DB.printAllUsers()
+
 
 if __name__ == '__main__':
     userSession = Session(True, 'Alex', 'ashore')

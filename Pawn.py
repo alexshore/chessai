@@ -1,11 +1,10 @@
-from Rook import Rook
 from Bishop import Bishop
-from Knight import Knight
-from Queen import Queen
-
-from Piece import Piece
 from Coordinate import Coordinate as C
+from Knight import Knight
 from Move import Move
+from Piece import Piece
+from Queen import Queen
+from Rook import Rook
 
 WHITE = True
 BLACK = False
@@ -48,7 +47,8 @@ class Pawn(Piece):
                         self.board.pieceAtPosition(advanceOnePos) is None:
                     yield Move(self, advanceTwoPos)
 
-        movements = [C(1, 1), C(-1, 1)] if self.side == WHITE else [C(1, -1), C(-1, -1)]
+        movements = [C(1, 1), C(-1, 1)
+                     ] if self.side == WHITE else [C(1, -1), C(-1, -1)]
         for movement in movements:
             newPos = self.position + movement
             if self.board.isValidPos(newPos):
@@ -62,7 +62,8 @@ class Pawn(Piece):
                              Bishop(self.board, self.side, newPos),
                              Queen(self.board, self.side, newPos)]
                         for piece in piecesForPromotion:
-                            move = Move(self, newPos, pieceToCapture=pieceToTake)
+                            move = Move(
+                                self, newPos, pieceToCapture=pieceToTake)
                             move.promotion = True
                             move.specialMovePiece = piece
                             yield move

@@ -1,9 +1,14 @@
-import sqlite3, os, datetime as dt, re
+import datetime as dt
+import os
+import re
+import sqlite3
 from getpass import *
+
 
 def consoleClear():
     os.system('cls')
     os.system('cls')
+
 
 def command(code, *args):
     with sqlite3.connect('Chess.db') as conn:
@@ -15,11 +20,13 @@ def command(code, *args):
         data = db.fetchall()
         return data
 
+
 def createTable(sql):
     with sqlite3.connect('Chess.db') as conn:
         cursor = conn.cursor()
         cursor.execute(sql)
         conn.commit()
+
 
 def createMatches():
     sql = """CREATE TABLE IF NOT EXISTS Matches
@@ -33,6 +40,7 @@ Moves integer,
 PRIMARY KEY(MatchID)
 FOREIGN KEY(Username) REFERENCES Users(Username))"""
     command(sql)
+
 
 def createUsers():
     sql = """CREATE TABLE IF NOT EXISTS Users
@@ -48,6 +56,7 @@ PRIMARY KEY(Username)
 FOREIGN KEY(SecurityID) REFERENCES Security(SecurityID))"""
     command(sql)
 
+
 def createSecurity():
     sql = """CREATE TABLE IF NOT EXISTS Security
 (SecurityID integer,
@@ -55,27 +64,41 @@ Question text,
 PRIMARY KEY(SecurityID))"""
     command(sql)
 
+
+def addMatch(username, won, side, moves, piecesLeft, endPointAdvantage):
+    date = dt.datetime.today().strftime('%d/%m/%Y')
+    command("INSERT INTO Matches VALUES (?, ?, ?, ?, ?, ?, ?)", username, date, won, side, moves,
+            piecesLeft, endPointAdvantage)
+
+
 def addInitUser():
     date = dt.datetime.today().strftime('%d/%m/%Y')
     temp = ['ashore', 'pw', True, 'Alex', 'Shore', date, 1, 'echo']
     command("INSERT INTO Users VALUES (?, ?, ?, ?, ?, ?, ?, ?)", temp[0], temp[1], temp[2], temp[3],
-                                                                    temp[4], temp[5], temp[6], temp[7])
+            temp[4], temp[5], temp[6], temp[7])
     temp = ['jfrost', 'pw', False, 'James', 'Frost', date, 1, 'honey']
     command("INSERT INTO Users VALUES (?, ?, ?, ?, ?, ?, ?, ?)", temp[0], temp[1], temp[2], temp[3],
-                                                                    temp[4], temp[5], temp[6], temp[7])
+            temp[4], temp[5], temp[6], temp[7])
+
 
 def addNewUser(username, password, isAdmin, firstName, surName, date, SID, answer):
     command("INSERT INTO Users VALUES (?, ?, ?, ?, ?, ?, ?, ?)", username, password, isAdmin, firstName,
-                                                                    surName, date, SID, answer)
+            surName, date, SID, answer)
+
+
 def checkUsernameExists(Username):
-    valid = command("SELECT Users.Username FROM Users WHERE Users.Username = ?", Username)
+    valid = command(
+        "SELECT Users.Username FROM Users WHERE Users.Username = ?", Username)
     return True if valid else False
+
 
 def getSecurityQuestions():
     return command("SELECT * FROM Security")
 
+
 def setPass(Username, Password):
     command("UPDATE Users SET Password = ? WHERE Username = ?", Password, Username)
+
 
 def getQuestion(Username):
     return command("""
@@ -84,11 +107,13 @@ FROM Security
 INNER JOIN Users ON (Security.SecurityID = Users.SecurityID)
 WHERE Users.Username = ?""", Username)[0][0]
 
+
 def getAnswer(Username):
     return command("""
 SELECT Users.Answer
 FROM Users
 WHERE Users.Username = ?""", Username)[0][0]
+
 
 def getSessionDetails(Username):
     data = command("""
@@ -99,6 +124,7 @@ FROM Users
 WHERE Users.Username = ?""", Username)
     return data[0]
 
+
 def checkLogInData(Username, Password):
     data = command("""
 SELECT Users.Username
@@ -108,14 +134,19 @@ AND Users.Password = ?
 """, Username, Password)
     return data
 
+
 def printAllUsers():
     users = getAllUsers()
-    print('+' + '-' * 15 + '+' + '-' * 13 + '+' + '-' * 17 + '+' + '-' * 13 + '+')
+    print('+' + '-' * 15 + '+' + '-' * 13
+          + '+' + '-' * 17 + '+' + '-' * 13 + '+')
     print(f"|{'Username':>14} |{'Firstname':>12} |{'Surname':>16} |{'Created':>12} |")
-    print('+' + '-' * 15 + '+' + '-' * 13 + '+' + '-' * 17 + '+' + '-' * 13 + '+')
+    print('+' + '-' * 15 + '+' + '-' * 13
+          + '+' + '-' * 17 + '+' + '-' * 13 + '+')
     for user in users:
         print(f"|{user[0]:>14} |{user[1]:>12} |{user[2]:>16} |{user[3]:>12} |")
-    print('+' + '-' * 15 + '+' + '-' * 13 + '+' + '-' * 17 + '+' + '-' * 13 + '+')
+    print('+' + '-' * 15 + '+' + '-' * 13
+          + '+' + '-' * 17 + '+' + '-' * 13 + '+')
+
 
 def getAllUsers():
     data = command("""
@@ -126,29 +157,33 @@ Users.created
 FROM Users""")
     return data
 
+
 def printUserDetails(Username):
-    Username, Password, isAdmin, FirstName, SurName, Created = getUserDetails(Username)
-    connector ='+' + '-' * 15 + '+' + '-' * 19 + '+' + '-' * 10 + \
-               '+' + '-' * 13 + '+' + '-' * 17 + '+' + '-' * 13 + '+'
+    Username, Password, isAdmin, FirstName, SurName, Created = getUserDetails(
+        Username)
+    connector = '+' + '-' * 15 + '+' + '-' * 19 + '+' + '-' * 10 + \
+        '+' + '-' * 13 + '+' + '-' * 17 + '+' + '-' * 13 + '+'
     print(connector)
-    print(f"|{'Username':>14} |{'Password':>18} |{'isAdmin':>9} " + \
+    print(f"|{'Username':>14} |{'Password':>18} |{'isAdmin':>9} " +
           f"|{'FirstName':>12} |{'SurName':>16} |{'Created':>12} |")
     print(connector)
-    print(f"|{Username:>14} |{Password:>18} |{isAdmin:>9} " + \
+    print(f"|{Username:>14} |{Password:>18} |{isAdmin:>9} " +
           f"|{FirstName:>12} |{SurName:>16} |{Created:>12} |")
     print(connector + '\n')
+
 
 def editUser(isAdmin, Username):
     while True:
         consoleClear()
         printUserDetails(Username)
-        fieldChange = input('\nWhich field would you like to change (case-sensitive). Enter \'x\' to return: ')
+        fieldChange = input(
+            '\nWhich field would you like to change (case-sensitive). Enter \'x\' to return: ')
         consoleClear()
         newItem = None
         if fieldChange.lower() == 'x':
             return
-        elif fieldChange == 'Username' and isAdmin:
-            newItem = getUsername()
+        elif fieldChange == 'Username':
+            print('Due to complications in code, this is unchangeable.')
         elif fieldChange == 'Password':
             newItem = getPassword()
         elif fieldChange == 'isAdmin':
@@ -167,20 +202,26 @@ def editUser(isAdmin, Username):
         if newItem:
             try:
                 editUserField(fieldChange, newItem, Username)
-                print(f'{fieldChange} changed from {getUserField(fieldChange, Username)} to {newItem} for user \'{Username}\'.')
+                print(
+                    f'{fieldChange} changed from {getUserField(fieldChange, Username)} to {newItem} for user \'{Username}\'.')
                 getpass('Press enter to continue.')
                 break
             except:
                 getpass('Something went wrong. Press enter to try again.')
 
+
 def editUserField(Field, newItem, Username):
-    command("UPDATE Users SET {} = ? WHERE Users.Username = ?".format(Field), newItem, Username)
+    command("UPDATE Users SET {} = ? WHERE Users.Username = ?".format(
+        Field), newItem, Username)
+
 
 def getUserField(Field, Username):
     return command("SELECT Users.{} FROM Users WHERE Users.Username = ?".format(Field), Username)[0][0]
 
+
 def getUserDetails(Username):
     return command("SELECT * FROM Users WHERE Users.Username = ?", Username)[0][:6]
+
 
 def viewSecurity(Username):
     consoleClear()
@@ -202,10 +243,12 @@ WHERE Users.Username = ?""", Username)[0]
             editUserField('Answer', Answer, Username)
         break
 
+
 def changePassword(Username):
     if checkPasswordMatch(Username):
         newPassword = getPassword()
         setPass(Username, newPassword)
+
 
 def checkPasswordMatch(Username):
     while True:
@@ -222,6 +265,7 @@ AND Users.Password = ?
             retry = input('Invalid password. Retry? (yN) ')
             if retry.lower() != 'y':
                 return False
+
 
 def logIn():
     while True:
@@ -243,6 +287,7 @@ AND Users.Password = ?
             if tryAgain.lower() != 'y':
                 return
 
+
 def getUsername():
     while True:
         consoleClear()
@@ -251,6 +296,7 @@ def getUsername():
             return Username
         else:
             print('Username already in use, try another.\n')
+
 
 def checkPasswordValidity(Password):
     if len(Password) < 8:
@@ -267,6 +313,7 @@ def checkPasswordValidity(Password):
         print('Password can\'t contain spaces. Try again.\n')
     else:
         return True
+
 
 def getPassword():
     consoleClear()
@@ -286,10 +333,12 @@ def getPassword():
             consoleClear()
             getpass('Passwords don\'t match. Press enter to try again.\n')
 
+
 def getEditableAdmin():
     consoleClear()
     adminAttempt = input('Set this account as admin? (yN) ')
     return True if adminAttempt.lower() == 'y' else False
+
 
 def getIsAdmin():
     consoleClear()
@@ -305,6 +354,7 @@ def getIsAdmin():
         if tryAgain.lower() != 'y':
             return False
 
+
 def getEditableDate():
     consoleClear()
     while True:
@@ -317,8 +367,10 @@ def getEditableDate():
             getpass('Invalid time entered. Press enter to try again.')
     return date.strftime('%d/%m%Y')
 
+
 def getCurrentDate():
     return dt.datetime.today().strftime('%d/%m/%Y')
+
 
 def getSecurity():
     consoleClear()
@@ -335,11 +387,13 @@ def getSecurity():
     Answer = input('Enter answer: ')
     return SID, Answer
 
+
 def getPersonalDetails():
     consoleClear()
     Firstname = input('Firstname: ')
     Surname = input('Surname: ')
     return Firstname, Surname
+
 
 def createAccount():
     consoleClear()
@@ -350,7 +404,9 @@ def createAccount():
     Firstname, Surname = getPersonalDetails()
     date = getCurrentDate()
     SID, Answer = getSecurity()
-    addNewUser(Username, Password, isAdmin, Firstname, Surname, date, SID, Answer)
+    addNewUser(Username, Password, isAdmin,
+               Firstname, Surname, date, SID, Answer)
+
 
 def forgotPassword():
     while True:
@@ -362,10 +418,12 @@ def forgotPassword():
             while True:
                 Answer = getpass('Answer: ')
                 if Answer == getAnswer(Username):
-                    getpass('You may now enter a new password. Press enter to continue.')
+                    getpass(
+                        'You may now enter a new password. Press enter to continue.')
                     newPassword = getPassword()
                     setPass(Username, newPassword)
-                    getpass('Your password has been changed. Press enter to continue.')
+                    getpass(
+                        'Your password has been changed. Press enter to continue.')
                     return
                 else:
                     retry = input('Invalid answer. Try again? (yN) ')
@@ -376,12 +434,15 @@ def forgotPassword():
             if retry.lower() != 'y':
                 return
 
+
 def bootDB():
     dump()
     addInitUser()
 
+
 def dump():
     command("DELETE FROM Users")
+
 
 def menu():
     print('Options:\n')
@@ -391,6 +452,7 @@ def menu():
     print('Q - Quit.')
     menuChoice = input('Enter your choice: ')
     return menuChoice
+
 
 def main():
     while True:
@@ -404,6 +466,7 @@ def main():
             bootDB()
         elif choice.lower() == 'q':
             return
+
 
 if __name__ == '__main__':
     main()

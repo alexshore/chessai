@@ -1,10 +1,16 @@
-from Session import Session
+import datetime as dt
+import os
+import re
 from getpass import getpass
-import re, os, Database as DB, datetime as dt
+
+import Database as DB
+from Session import Session
+
 
 def consoleClear():
     os.system('cls')
     os.system('cls')
+
 
 def accountMenu():
     consoleClear()
@@ -15,6 +21,7 @@ def accountMenu():
     print('4 - Reboot DB.')
     print('0 - Quit.')
     return int(input('Option: ')[0])
+
 
 def main():
     while True:
@@ -38,6 +45,7 @@ def main():
             return
         else:
             print('Unable to parse input.')
+
 
 if __name__ == '__main__':
     main()

@@ -1,5 +1,6 @@
 import re
 
+
 class InputParser:
 
     def __init__(self, board, side):

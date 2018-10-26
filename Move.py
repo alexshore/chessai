@@ -39,7 +39,7 @@ class Move:
         transTable = str.maketrans('01234567', 'abcdefgh')
         notation = str(pos[0]).translate(transTable) + str(pos[1] + 1)
         return notation
-    
+
     def __str__(self):
         displayString = 'Old Pos: {}'.format(self.oldPos) + \
                         'New Pos: {}'.format(self.newPos)

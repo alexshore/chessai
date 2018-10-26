@@ -1,8 +1,9 @@
-from MoveNode import MoveNode
-from InputParser import InputParser
 import copy
 import random
 from multiprocessing import Pool
+
+from InputParser import InputParser
+from MoveNode import MoveNode
 
 WHITE = True
 BLACK = False

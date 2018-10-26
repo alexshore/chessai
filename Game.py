@@ -1,24 +1,36 @@
-from Board import Board
-from Pawn import Pawn
-from Rook import Rook
-from King import King
-from Queen import Queen
-from Bishop import Bishop
-from Knight import Knight
-from Coordinate import Coordinate as C
-from Move import Move
-from Piece import Piece
-from AI import AI
-from InputParser import InputParser
-import random, os
+import os
+import random
 from getpass import *
+
+import Database as DB
+import Stats
+from AI import AI
+from Bishop import Bishop
+from Board import Board
+from Coordinate import Coordinate as C
+from InputParser import InputParser
+from King import King
+from Knight import Knight
+from Move import Move
+from Pawn import Pawn
+from Piece import Piece
+from Queen import Queen
+from Rook import Rook
 
 WHITE = True
 BLACK = False
 
+
 def consoleClear():
     os.system('cls')
     os.system('cls')
+
+
+def recordMatch(username, board, side, won, ai):
+    DB.addMatch(username, won, 'WHITE' if side else 'BLACK',
+                ai.depth, board.movesMade, len(board.pieces),
+                board.getPointAdvantageOfSide(side))
+
 
 def askForPlayerSide():
     playerInput = input(
@@ -30,15 +42,17 @@ def askForPlayerSide():
         print('You will play as black.')
         return BLACK
 
+
 def askForAIDepth():
     depthInput = 2
     try:
-        depthInput = int(input('How deep should the AI look for moves?\n' + \
-                               '-WARNING- values above 3 will be slow.\n' + \
-                               'Leave blank for default: '))
+        depthInput = int(input('How deep should the AI look for moves?\n'
+                               + '-WARNING- values above 3 will be slow.\n'
+                               + 'Leave blank for default: '))
     except:
         print('Invalid input, defaulting to 2.')
     return depthInput
+
 
 def listMoves(board, parser, pawns):
     consoleClear()
@@ -46,7 +60,8 @@ def listMoves(board, parser, pawns):
     movesWithPiece = [[]]
     pieceRep = ''
     for move in moves:
-        columnHead = move.piece.stringRep + ' - {}'.format(move.positionToHumanCoord(move.oldPos))
+        columnHead = move.piece.stringRep + \
+            ' - {}'.format(move.positionToHumanCoord(move.oldPos))
         if (pawns or move.piece.stringRep != 'p') and [columnHead, move.piece] not in movesWithPiece[0]:
             movesWithPiece.append([])
             movesWithPiece[0].append([columnHead, move.piece])
@@ -67,7 +82,7 @@ def listMoves(board, parser, pawns):
     for i in range(len(movesWithPiece[0])):
         columnHeader += '{:>7} |'.format(movesWithPiece[0][i][0])
         connector += '-' * 8 + '+'
-    print('\n' + connector + '\n' + columnHeader + '\n' + connector)
+    print(connector + '\n' + columnHeader + '\n' + connector)
     rows = []
     for i in range(len(movesWithPiece[1])):
         rows.append([])
@@ -79,48 +94,55 @@ def listMoves(board, parser, pawns):
         for each in range(len(rows[i])):
             row += "{:>7} |".format(rows[i][each])
         print(row)
-    print(connector)
-    print('\n')
+    print(connector + '\n')
     getpass('Press enter to continue.')
+
 
 def printMakeMove(move, board):
     print()
     print('Making move: {}'.format(move.notation))
     board.makeMove(move)
 
+
 def getRandomMove(board, parser):
     legalMoves = board.getAllMovesLegal(board.currentSide)
     randomMove = random.choice(legalMoves)
     return randomMove
 
+
 def printPointAdvantage(board):
-    print('Currently, the point difference is: ' + \
-          str(board.getPointAdvantageOfSide(board.currentSide)))
+    print('Currently, the point difference is: '
+          + str(board.getPointAdvantageOfSide(board.currentSide)))
+
 
 def undoLastTwoMoves(board):
     if len(board.history) >= 2:
         board.undoLastMove()
         board.undoLastMove()
 
+
 def makeMove(move, board):
     print()
     print("Making move : " + move.notation)
     board.makeMove(move)
 
+
 def printCommandOptions():
     consoleClear()
+    print('- Options. -\n')
     undoOption = 'u - undo last move'
     printMovesOption = 'l - show all moves w/out pawns'
     printAllMovesOption = 'll - show all moves'
     randomMoveOption = 'r - make a random move'
     quitOption = 'quit - resign'
     moveOption = 'a3a5, c3xa5, 0-0, b7b8=R - make the move'
-    options = [undoOption, printMovesOption, randomMoveOption,
-               quitOption, moveOption, '', ]
+    options = [undoOption, printMovesOption, printAllMovesOption,
+               randomMoveOption, quitOption, moveOption, '', ]
     print('\n'.join(options))
     getpass('Press enter to continue.')
 
-def startGame(board, playerSide, ai):
+
+def startGame(board, playerSide, ai, username):
     parser = InputParser(board, playerSide)
     while True:
         consoleClear()
@@ -133,13 +155,14 @@ def startGame(board, playerSide, ai):
             else:
                 print('Checkmate! You won!')
                 win = False
-            board.recordMatch(playerSide)
+            recordMatch(username, board, playerSide, win, ai)
             return
         # if board.isStaleMate():
         #     print('Stalemate...')
         #     return
         if board.currentSide == playerSide:
             printPointAdvantage(board)
+            print(f'total moves made: {board.movesMade}')
             move = None
             command = input('It\'s your move. '
                             'Type \'?\' for options: ').lower()
@@ -169,20 +192,24 @@ def startGame(board, playerSide, ai):
             else:
                 print('Couldn\'t parse input, enter a valid command or move.')
         elif board.currentSide == ai.side:
+            print('AI thinking...')
             move = ai.getBestMove(False)
             move.notation = move.getNotation()
             makeMove(move, board)
+            getpass('\nPress enter to continue.')
             if board.currentSide == ai.side:
                 board.currentSide == playerSide
 
-def main():
+
+def main(username):
     consoleClear()
     board = Board()
     playerSide = askForPlayerSide()
     print()
     aiDepth = askForAIDepth()
     opponentAI = AI(board, not playerSide, aiDepth)
-    startGame(board, playerSide, opponentAI)
+    startGame(board, playerSide, opponentAI, username)
+
 
 if __name__ == '__main__':
-    main()
+    main('ashore')
