@@ -10,6 +10,10 @@ def consoleClear():
     os.system('cls')
 
 
+def resetMatches():
+    command("DELETE FROM Matches")
+
+
 def command(code, *args):
     with sqlite3.connect('Chess.db') as conn:
         db = conn.cursor()
