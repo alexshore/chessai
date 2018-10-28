@@ -65,10 +65,11 @@ PRIMARY KEY(SecurityID))"""
     command(sql)
 
 
-def addMatch(username, won, side, moves, piecesLeft, endPointAdvantage):
+def addMatch(username, won, side, depth, moves, piecesLeft, endPointAdvantage):
     date = dt.datetime.today().strftime('%d/%m/%Y')
-    command("INSERT INTO Matches VALUES (?, ?, ?, ?, ?, ?, ?)", username, date, won, side, moves,
-            piecesLeft, endPointAdvantage)
+    command("""
+INSERT INTO Matches(Username, DateOfGame, Won, Side, AIDepth, Moves, PiecesLeft, PointAdvantage) VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+            username, date, won, side, depth, moves, piecesLeft, endPointAdvantage)
 
 
 def addInitUser():
@@ -154,6 +155,13 @@ SELECT Users.Username,
 Users.FirstName,
 Users.SurName,
 Users.created
+FROM Users""")
+    return data
+
+
+def getAllUsernames():
+    data = command("""
+SELECT Users.Username
 FROM Users""")
     return data
 

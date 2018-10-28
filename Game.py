@@ -3,7 +3,6 @@ import random
 from getpass import *
 
 import Database as DB
-import Stats
 from AI import AI
 from Bishop import Bishop
 from Board import Board
@@ -87,8 +86,8 @@ def listMoves(board, parser, pawns):
     for i in range(len(movesWithPiece[1])):
         rows.append([])
     for i in range(1, len(movesWithPiece)):
-        for each in range(len(movesWithPiece[i])):
-            rows[each].append(movesWithPiece[i][each])
+        for row in range(len(movesWithPiece[i])):
+            rows[row].append(movesWithPiece[i][row])
     for i in range(len(rows)):
         row = "|"
         for each in range(len(rows[i])):
