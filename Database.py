@@ -142,15 +142,15 @@ AND Users.Password = ?
 
 def printAllUsers():
     users = getAllUsers()
-    print('+' + '-' * 15 + '+' + '-' * 13
-          + '+' + '-' * 17 + '+' + '-' * 13 + '+')
+    print('+' + '-' * 15 + '+' + '-' * 13 +
+          '+' + '-' * 17 + '+' + '-' * 13 + '+')
     print(f"|{'Username':>14} |{'Firstname':>12} |{'Surname':>16} |{'Created':>12} |")
-    print('+' + '-' * 15 + '+' + '-' * 13
-          + '+' + '-' * 17 + '+' + '-' * 13 + '+')
+    print('+' + '-' * 15 + '+' + '-' * 13 +
+          '+' + '-' * 17 + '+' + '-' * 13 + '+')
     for user in users:
         print(f"|{user[0]:>14} |{user[1]:>12} |{user[2]:>16} |{user[3]:>12} |")
-    print('+' + '-' * 15 + '+' + '-' * 13
-          + '+' + '-' * 17 + '+' + '-' * 13 + '+')
+    print('+' + '-' * 15 + '+' + '-' * 13 +
+          '+' + '-' * 17 + '+' + '-' * 13 + '+')
 
 
 def getAllUsers():
@@ -176,11 +176,11 @@ def printUserDetails(Username):
     connector = '+' + '-' * 15 + '+' + '-' * 19 + '+' + '-' * 10 + \
         '+' + '-' * 13 + '+' + '-' * 17 + '+' + '-' * 13 + '+'
     print(connector)
-    print(f"|{'Username':>14} |{'Password':>18} |{'isAdmin':>9} " +
-          f"|{'FirstName':>12} |{'SurName':>16} |{'Created':>12} |")
+    print(f"|{'Username':>14} |{'Password':>18} |{'isAdmin':>9} "
+          + f"|{'FirstName':>12} |{'SurName':>16} |{'Created':>12} |")
     print(connector)
-    print(f"|{Username:>14} |{Password:>18} |{isAdmin:>9} " +
-          f"|{FirstName:>12} |{SurName:>16} |{Created:>12} |")
+    print(f"|{Username:>14} |{Password:>18} |{isAdmin:>9} "
+          + f"|{FirstName:>12} |{SurName:>16} |{Created:>12} |")
     print(connector + '\n')
 
 
@@ -445,6 +445,39 @@ def forgotPassword():
             retry = input('Invalid username. Try again? (yN) ')
             if retry.lower() != 'y':
                 return
+
+
+def getMatchesByUser(Username):
+    data = command("SELECT * FROM Matches WHERE Username = ?", Username)
+    return len(data)
+
+
+def getWinsByUser(Username):
+    data = command(
+        "SELECT * FROM Matches WHERE Username = ? AND Won = 1", Username)
+    return len(data)
+
+
+def getPiecesByUser(Username):
+    data = command(
+        "SELECT PiecesLeft FROM Matches WHERE Username = ?", Username)
+
+    print(data)
+    # most = max([n[0] for n in data])
+
+def getStats(Username):
+    totalMatches = getMatchesByUser(Username)  # counts total matches
+    totalWins = getWinsByUser(Username)  # counts total wins
+    winRate = totalWins / totalMatches * 100  # works out win percentage
+    # gets average, most and least pieces left at the end of the games
+    pieces = [getPiecesByUser(Username)]
+    # gets average, most and least points for user at the end of the games
+    points = [getPointsByUser(Username)]
+    # gets average, most and least moves made in games
+    moves = [getMovesByUser(Username)]
+    lastGame = getLastGameDate(Username)  # gets the date of the last game
+    # gets the most common AI depth played against in last 10 games
+    AIDepth = getAIDepthByUser(Username)
 
 
 def bootDB():

@@ -26,6 +26,7 @@ class Session():
         print('S - Start a game.')
         print('V - View your stats.')
         print('E - Edit account settings.')
+        print('T - Test functions.')
         print('L - Log out.')
         return input('Option: ')[0].lower()
 
@@ -40,6 +41,8 @@ class Session():
                 Game.main()
             elif choice == 'e':
                 self.accountMenu()
+            elif choice == 't':
+                self.testing()
             else:
                 getpass('Unable to parse input. Press enter to try again.')
 
@@ -67,6 +70,21 @@ class Session():
                 if sure.lower() == 'y':
                     DB.bootDB()
                     getpass('Database rebooted. Press enter to continue.')
+
+    def printTestMenu(self):
+        self.consoleClear()
+        print('- Testing. -\n')
+        print('1 - getPiecesByUser')
+        print('0 - Return.')
+        return int(input('Option')[0])
+
+    def testing(self):
+        while True:
+            testChoice = self.printTestMenu()
+            if not testChoice:
+                return
+            elif testChoice == 1:
+                DB.getPiecesByUser(self.username)
 
     def printAccountMenu(self):
         self.consoleClear()
