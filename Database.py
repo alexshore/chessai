@@ -3,6 +3,7 @@ import os
 import re
 import sqlite3
 from getpass import *
+from statistics import mean, mode
 
 
 def consoleClear():
@@ -142,15 +143,15 @@ AND Users.Password = ?
 
 def printAllUsers():
     users = getAllUsers()
-    print('+' + '-' * 15 + '+' + '-' * 13 +
-          '+' + '-' * 17 + '+' + '-' * 13 + '+')
+    print('+' + '-' * 15 + '+' + '-' * 13
+          + '+' + '-' * 17 + '+' + '-' * 13 + '+')
     print(f"|{'Username':>14} |{'Firstname':>12} |{'Surname':>16} |{'Created':>12} |")
-    print('+' + '-' * 15 + '+' + '-' * 13 +
-          '+' + '-' * 17 + '+' + '-' * 13 + '+')
+    print('+' + '-' * 15 + '+' + '-' * 13
+          + '+' + '-' * 17 + '+' + '-' * 13 + '+')
     for user in users:
         print(f"|{user[0]:>14} |{user[1]:>12} |{user[2]:>16} |{user[3]:>12} |")
-    print('+' + '-' * 15 + '+' + '-' * 13 +
-          '+' + '-' * 17 + '+' + '-' * 13 + '+')
+    print('+' + '-' * 15 + '+' + '-' * 13
+          + '+' + '-' * 17 + '+' + '-' * 13 + '+')
 
 
 def getAllUsers():
@@ -176,11 +177,11 @@ def printUserDetails(Username):
     connector = '+' + '-' * 15 + '+' + '-' * 19 + '+' + '-' * 10 + \
         '+' + '-' * 13 + '+' + '-' * 17 + '+' + '-' * 13 + '+'
     print(connector)
-    print(f"|{'Username':>14} |{'Password':>18} |{'isAdmin':>9} "
-          + f"|{'FirstName':>12} |{'SurName':>16} |{'Created':>12} |")
+    print(f"|{'Username':>14} |{'Password':>18} |{'isAdmin':>9} " +
+          f"|{'FirstName':>12} |{'SurName':>16} |{'Created':>12} |")
     print(connector)
-    print(f"|{Username:>14} |{Password:>18} |{isAdmin:>9} "
-          + f"|{FirstName:>12} |{SurName:>16} |{Created:>12} |")
+    print(f"|{Username:>14} |{Password:>18} |{isAdmin:>9} " +
+          f"|{FirstName:>12} |{SurName:>16} |{Created:>12} |")
     print(connector + '\n')
 
 
@@ -458,26 +459,62 @@ def getWinsByUser(Username):
     return len(data)
 
 
-def getPiecesByUser(Username):
-    data = command(
-        "SELECT PiecesLeft FROM Matches WHERE Username = ?", Username)
+def getWinRateByUser(Username):
+    return int(round(getWinsByUser(Username) / getMatchesByUser(Username) * 100, 0))
 
-    print(data)
-    # most = max([n[0] for n in data])
+
+def getListStats(list):
+    return [max(list), min(list), int(round(mean(list), 0))]
+
+
+def getStatsByUser(Field, Username):
+    data = command(
+        "SELECT {} FROM Matches WHERE Username = ?".format(Field), Username)
+    list = [n[0] for n in data]
+    return getListStats(list)
+
+
+def getPiecesByUser(Username):
+    return getStatsByUser('PiecesLeft', Username)
+
+
+def getPointsByUser(Username):
+    return getStatsByUser('PointAdvantage', Username)
+
+
+def getMovesByUser(Username):
+    return getStatsByUser('Moves', Username)
+
+
+def getLastGameDate(Username):
+    return command("SELECT DateOfGame FROM Matches WHERE Username = ?", Username)[-1][0]
+
+
+def getAIDepthByUser(Username):
+    data = command("SELECT AIDepth FROM Matches WHERE Username = ?", Username)[:-10]
+    return mode([n[0] for n in data])
+
 
 def getStats(Username):
-    totalMatches = getMatchesByUser(Username)  # counts total matches
-    totalWins = getWinsByUser(Username)  # counts total wins
-    winRate = totalWins / totalMatches * 100  # works out win percentage
-    # gets average, most and least pieces left at the end of the games
-    pieces = [getPiecesByUser(Username)]
-    # gets average, most and least points for user at the end of the games
-    points = [getPointsByUser(Username)]
-    # gets average, most and least moves made in games
-    moves = [getMovesByUser(Username)]
-    lastGame = getLastGameDate(Username)  # gets the date of the last game
-    # gets the most common AI depth played against in last 10 games
-    AIDepth = getAIDepthByUser(Username)
+    allStats = []
+    allStats.extend([getMatchesByUser(Username),
+                    getWinsByUser(Username),
+                    getWinRateByUser(Username),
+                    getPiecesByUser(Username),
+                    getPointsByUser(Username),
+                    getMovesByUser(Username),
+                    getLastGameDate(Username),
+                    getAIDepthByUser(Username)])
+    printStats(allStats)
+
+
+def printStats(stats):
+    consoleClear()
+    print('- Stats Table. -\n')
+    print(f"{'Total matches played: ':<30}" + f'{stats[0]:>10}')
+    print(f"{'Total match wins: ':<30}" + f'{stats[1]:>10}')
+    print(f"{'Percentage win rate: ':<30}" + f'{stats[2]:>10}')
+    getpass('press enter')
 
 
 def bootDB():

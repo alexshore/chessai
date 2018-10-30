@@ -75,8 +75,9 @@ class Session():
         self.consoleClear()
         print('- Testing. -\n')
         print('1 - getPiecesByUser')
+        print('2 - getStats')
         print('0 - Return.')
-        return int(input('Option')[0])
+        return int(input('Option: ')[0])
 
     def testing(self):
         while True:
@@ -84,7 +85,9 @@ class Session():
             if not testChoice:
                 return
             elif testChoice == 1:
-                DB.getPiecesByUser(self.username)
+                input(DB.getPiecesByUser(self.username))
+            elif testChoice == 2:
+                DB.getStats(self.username)
 
     def printAccountMenu(self):
         self.consoleClear()
