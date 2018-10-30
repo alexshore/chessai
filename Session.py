@@ -26,7 +26,6 @@ class Session():
         print('S - Start a game.')
         print('V - View your stats.')
         print('E - Edit account settings.')
-        print('T - Test functions.')
         print('L - Log out.')
         return input('Option: ')[0].lower()
 
@@ -37,19 +36,19 @@ class Session():
                 return
             elif choice == 'a' and self.isAdmin:
                 self.adminMenu()
+            elif choice == 'v':
+                DB.getStats(self.username)
             elif choice == 's':
-                Game.main()
+                Game.main(self.username)
             elif choice == 'e':
                 self.accountMenu()
-            elif choice == 't':
-                self.testing()
             else:
                 getpass('Unable to parse input. Press enter to try again.')
 
     def printAdminMenu(self):
         self.consoleClear()
         print('- Admin Menu. -\n')
-        print('1 - Edit/View all matches.')
+        print('1 - View recent matches.')
         print('2 - Edit/View all users.')
         print('3 - Reset database.')
         print('0 - Back to main menu.')
@@ -61,7 +60,7 @@ class Session():
             if not adminChoice:
                 return
             elif adminChoice == 1:
-                print('match view thing')
+                DB.printRecentMatches()
             elif adminChoice == 2:
                 self.adminUserMenu()
             elif adminChoice == 3:
@@ -70,24 +69,6 @@ class Session():
                 if sure.lower() == 'y':
                     DB.bootDB()
                     getpass('Database rebooted. Press enter to continue.')
-
-    def printTestMenu(self):
-        self.consoleClear()
-        print('- Testing. -\n')
-        print('1 - getPiecesByUser')
-        print('2 - getStats')
-        print('0 - Return.')
-        return int(input('Option: ')[0])
-
-    def testing(self):
-        while True:
-            testChoice = self.printTestMenu()
-            if not testChoice:
-                return
-            elif testChoice == 1:
-                input(DB.getPiecesByUser(self.username))
-            elif testChoice == 2:
-                DB.getStats(self.username)
 
     def printAccountMenu(self):
         self.consoleClear()

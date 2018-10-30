@@ -77,6 +77,17 @@ INSERT INTO Matches(Username, DateOfGame, Won, Side, AIDepth, Moves, PiecesLeft,
             username, date, won, side, depth, moves, piecesLeft, endPointAdvantage)
 
 
+def getRecentMatches():
+    return command("SELECT * FROM Matches")[:-10]
+
+
+def printRecentMatches():
+    c = '+'
+    connector = c + '-' * 15 + c + + '-' *
+    for each in [15, 13, 7, 8, ] 
+
+
+
 def addInitUser():
     date = dt.datetime.today().strftime('%d/%m/%Y')
     temp = ['ashore', 'pw', True, 'Alex', 'Shore', date, 1, 'echo']
@@ -467,7 +478,7 @@ def getListStats(list):
     return [max(list), min(list), int(round(mean(list), 0))]
 
 
-def getStatsByUser(Field, Username):
+def getFieldByUser(Field, Username):
     data = command(
         "SELECT {} FROM Matches WHERE Username = ?".format(Field), Username)
     list = [n[0] for n in data]
@@ -475,15 +486,15 @@ def getStatsByUser(Field, Username):
 
 
 def getPiecesByUser(Username):
-    return getStatsByUser('PiecesLeft', Username)
+    return getFieldByUser('PiecesLeft', Username)
 
 
 def getPointsByUser(Username):
-    return getStatsByUser('PointAdvantage', Username)
+    return getFieldByUser('PointAdvantage', Username)
 
 
 def getMovesByUser(Username):
-    return getStatsByUser('Moves', Username)
+    return getFieldByUser('Moves', Username)
 
 
 def getLastGameDate(Username):
@@ -510,11 +521,18 @@ def getStats(Username):
 
 def printStats(stats):
     consoleClear()
-    print('- Stats Table. -\n')
+    print('- Base stats. -\n')
     print(f"{'Total matches played: ':<30}" + f'{stats[0]:>10}')
     print(f"{'Total match wins: ':<30}" + f'{stats[1]:>10}')
     print(f"{'Percentage win rate: ':<30}" + f'{stats[2]:>10}')
-    getpass('press enter')
+    print(f"{'Common AI depth (recent): ':<30}" + f'{stats[7]:>10}')
+    print(f"{'Last played game: ':<30}" + f'{stats[6]:>10}\n')
+    print('- More stats (most-least-average). -\n')
+    print(f"{'Pieces left:':<20}" + f'{stats[3][0]:^3}/{stats[3][1]:^3}/{stats[3][2]:>3}')
+    print(f"{'Point advantage:':<20}" + f'{stats[4][0]:^3}/{stats[4][1]:^3}/{stats[4][2]:>3}')
+    print(f"{'Moves made: ':<20}" + f'{stats[5][0]:^3}/{stats[5][1]:^3}/{stats[5][2]:>3}\n')
+    getpass('Press enter to continue:')
+
 
 
 def bootDB():
