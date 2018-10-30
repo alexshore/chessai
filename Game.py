@@ -61,7 +61,8 @@ def listMoves(board, parser, pawns):
     for move in moves:
         columnHead = move.piece.stringRep + \
             ' - {}'.format(move.positionToHumanCoord(move.oldPos))
-        if (pawns or move.piece.stringRep != 'p') and [columnHead, move.piece] not in movesWithPiece[0]:
+        if (pawns or move.piece.stringRep != 'p') and \
+                [columnHead, move.piece] not in movesWithPiece[0]:
             movesWithPiece.append([])
             movesWithPiece[0].append([columnHead, move.piece])
     for piece in range(len(movesWithPiece[0])):
