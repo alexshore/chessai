@@ -78,21 +78,30 @@ INSERT INTO Matches(Username, DateOfGame, Won, Side, AIDepth, Moves, PiecesLeft,
 
 
 def getRecentMatches():
-    return command("SELECT * FROM Matches")[:-10]
+    return command("SELECT * FROM Matches")[-10::]
 
 
 def printRecentMatches():
-    c = '+'
-    connector = c + '-' * 15 + c + + '-' *
-    for each in [15, 13, 7, 8, ] 
-
+    matches = getRecentMatches()
+    connector = '+'
+    for i in [14, 12, 7, 7, 9, 7, 12, 16]:
+        connector += '-' * i + '+'
+    header = f"|{'Username':>13} |{'DateOfGame':>11} |{'Won':>6} " + \
+             f"|{'Side':>6} |{'AIDepth':>8} |{'Moves':>6} " + \
+             f"|{'PiecesLeft':>11} |{'PointAdvantage':>15} |\n"
+    print(connector + '\n' + header + connector)
+    for match in matches[::-1]:
+        print(f"|{match[1]:>13} |{match[2]:>11} |{'True' if match[3] else 'False':>6} " + \
+              f'|{match[4]:>6} |{match[5]:>8} |{match[6]:>6} |{match[7]:>11} |{match[8]:>15} |')
+    print(connector)
+    getpass('Press enter to continue.')
 
 
 def addInitUser():
     date = dt.datetime.today().strftime('%d/%m/%Y')
     temp = ['ashore', 'pw', True, 'Alex', 'Shore', date, 1, 'echo']
-    command("INSERT INTO Users VALUES (?, ?, ?, ?, ?, ?, ?, ?)", temp[0], temp[1], temp[2], temp[3],
-            temp[4], temp[5], temp[6], temp[7])
+    command("INSERT INTO Users VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            temp[0], temp[1], temp[2], temp[3], temp[4], temp[5], temp[6], temp[7])
     temp = ['jfrost', 'pw', False, 'James', 'Frost', date, 1, 'honey']
     command("INSERT INTO Users VALUES (?, ?, ?, ?, ?, ?, ?, ?)", temp[0], temp[1], temp[2], temp[3],
             temp[4], temp[5], temp[6], temp[7])
@@ -316,10 +325,12 @@ def getUsername():
     while True:
         consoleClear()
         Username = input('Username: ')
-        if not checkUsernameExists(Username):
-            return Username
+        if checkUsernameExists(Username):
+            getpass('Username already in use. Press enter to try again.')
+        elif len(Username) > 12 or len(Username) < 6:
+            getpass('Username has to be between 6 and 12 characters long.')
         else:
-            print('Username already in use, try another.\n')
+            return Username
 
 
 def checkPasswordValidity(Password):
@@ -383,9 +394,9 @@ def getEditableDate():
     consoleClear()
     while True:
         try:
-            Year = input('What year was this account created: ')
-            Month = input('What month was this account created: ')
-            Day = input('What day was this account created: ')
+            Year = input('What year was account created: ')
+            Month = input('What month was account created: ')
+            Day = input('What day was account created: ')
             date = dt.date(Year, Month, Day)
         except:
             getpass('Invalid time entered. Press enter to try again.')
@@ -502,20 +513,21 @@ def getLastGameDate(Username):
 
 
 def getAIDepthByUser(Username):
-    data = command("SELECT AIDepth FROM Matches WHERE Username = ?", Username)[:-10]
+    data = command(
+        "SELECT AIDepth FROM Matches WHERE Username = ?", Username)[:-10]
     return mode([n[0] for n in data])
 
 
 def getStats(Username):
     allStats = []
     allStats.extend([getMatchesByUser(Username),
-                    getWinsByUser(Username),
-                    getWinRateByUser(Username),
-                    getPiecesByUser(Username),
-                    getPointsByUser(Username),
-                    getMovesByUser(Username),
-                    getLastGameDate(Username),
-                    getAIDepthByUser(Username)])
+                     getWinsByUser(Username),
+                     getWinRateByUser(Username),
+                     getPiecesByUser(Username),
+                     getPointsByUser(Username),
+                     getMovesByUser(Username),
+                     getLastGameDate(Username),
+                     getAIDepthByUser(Username)])
     printStats(allStats)
 
 
@@ -528,11 +540,13 @@ def printStats(stats):
     print(f"{'Common AI depth (recent): ':<30}" + f'{stats[7]:>10}')
     print(f"{'Last played game: ':<30}" + f'{stats[6]:>10}\n')
     print('- More stats (most-least-average). -\n')
-    print(f"{'Pieces left:':<20}" + f'{stats[3][0]:^3}/{stats[3][1]:^3}/{stats[3][2]:>3}')
-    print(f"{'Point advantage:':<20}" + f'{stats[4][0]:^3}/{stats[4][1]:^3}/{stats[4][2]:>3}')
-    print(f"{'Moves made: ':<20}" + f'{stats[5][0]:^3}/{stats[5][1]:^3}/{stats[5][2]:>3}\n')
+    print(f"{'Pieces left:':<20}" +
+          f'{stats[3][0]:^3}/{stats[3][1]:^3}/{stats[3][2]:>3}')
+    print(f"{'Point advantage:':<20}" +
+          f'{stats[4][0]:^3}/{stats[4][1]:^3}/{stats[4][2]:>3}')
+    print(f"{'Moves made: ':<20}" +
+          f'{stats[5][0]:^3}/{stats[5][1]:^3}/{stats[5][2]:>3}\n')
     getpass('Press enter to continue:')
-
 
 
 def bootDB():
