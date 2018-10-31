@@ -139,7 +139,7 @@ class Session():
             elif menuChoice == 2:
                 while True:
                     self.consoleClear()
-                    DB.printAllUsers()
+                    DB.printUsers()
                     Username = input(
                         '\nWhich user would you like to edit? (case-sensitive) ')
                     if DB.checkUsernameExists(Username):
@@ -153,6 +153,7 @@ class Session():
                 getpass('Unable to parse input. Press enter to re-try.')
 
     def printUserSearchMenu(self):
+        self.consoleClear()
         print('- User search menu. -\n')
         print('1 - Search by username.')
         print('2 - Search by firstname.')

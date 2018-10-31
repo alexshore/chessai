@@ -91,8 +91,8 @@ def printRecentMatches():
              f"|{'PiecesLeft':>11} |{'PointAdvantage':>15} |\n"
     print(connector + '\n' + header + connector)
     for match in matches[::-1]:
-        print(f"|{match[1]:>13} |{match[2]:>11} |{'True' if match[3] else 'False':>6} " + \
-              f'|{match[4]:>6} |{match[5]:>8} |{match[6]:>6} |{match[7]:>11} |{match[8]:>15} |')
+        print(f"|{match[1]:>13} |{match[2]:>11} |{'True' if match[3] else 'False':>6} "
+              + f'|{match[4]:>6} |{match[5]:>8} |{match[6]:>6} |{match[7]:>11} |{match[8]:>15} |')
     print(connector)
     getpass('Press enter to continue.')
 
@@ -110,6 +110,69 @@ def addInitUser():
 def addNewUser(username, password, isAdmin, firstName, surName, date, SID, answer):
     command("INSERT INTO Users VALUES (?, ?, ?, ?, ?, ?, ?, ?)", username, password, isAdmin, firstName,
             surName, date, SID, answer)
+
+
+def searchByField(Field, Search):
+    return command("""
+SELECT Users.Username,
+Users.FirstName,
+Users.SurName,
+Users.isAdmin,
+Users.Created
+FROM Users WHERE {} = ?""".format(Field), Search)
+
+
+def searchByUsername():
+    consoleClear()
+    Search = input('Enter username to search for: ')
+    data = searchByField('Username', Search)
+    if data:
+        printUsers(data)
+    else:
+        getpass('No user(s) found. Press enter to return to menu.')
+
+
+def searchByFirstname():
+    consoleClear()
+    Search = input('Enter firstname to search for: ')
+    data = searchByField('FirstName', Search)
+    if data:
+        printUsers(data)
+    else:
+        getpass('No user(s) found. Press enter to return to menu.')
+
+
+def searchByLastname():
+    consoleClear()
+    Search = input('Enter lastname to search for: ')
+    data = searchByField('SurName', Search)
+    if data:
+        printUsers(data)
+    else:
+        getpass('No user(s) found. Press enter to return to menu.')
+
+
+def searchByDate():
+    consoleClear()
+    Search = getEditableDate()
+    data = searchByField('Created', Search)
+    if data:
+        printUsers(data)
+    else:
+        getpass('No user(s) found. Press enter to return to menu.')
+
+
+def searchByAdmin():
+    consoleClear()
+    print('- Account types. -\n')
+    print('0 - Regular account.')
+    print('1 - Admin account.')
+    Search = int(input('Option: ')[0])
+    data = searchByField('isAdmin', Search)
+    if data:
+        printUsers(data)
+    else:
+        getpass('No user(s) found. Press enter to return to menu.')
 
 
 def checkUsernameExists(Username):
@@ -161,38 +224,38 @@ AND Users.Password = ?
     return data
 
 
-def printAllUsers():
-    users = getAllUsers()
-    print('+' + '-' * 15 + '+' + '-' * 13
-          + '+' + '-' * 17 + '+' + '-' * 13 + '+')
-    print(f"|{'Username':>14} |{'Firstname':>12} |{'Surname':>16} |{'Created':>12} |")
-    print('+' + '-' * 15 + '+' + '-' * 13
-          + '+' + '-' * 17 + '+' + '-' * 13 + '+')
+def printUsers(users):
+    connector = '+' + '-' * 14 + '+' + '-' * 13 + '+' + '-' * 17 + '+' + '-' * 9  + '+' + '-' * 12 + '+'
+    print(connector)
+    print(f"|{'Username':>13} |{'Firstname':>12} |{'Surname':>16} |{'isAdmin':>8} |{'Created':>11} |")
+    print(connector)
     for user in users:
-        print(f"|{user[0]:>14} |{user[1]:>12} |{user[2]:>16} |{user[3]:>12} |")
-    print('+' + '-' * 15 + '+' + '-' * 13
-          + '+' + '-' * 17 + '+' + '-' * 13 + '+')
-
+        print(type(user[3]))
+        print(user[3])
+        print(
+            f"|{user[0]:>13} |{user[1]:>12} |{user[2]:>16} |{'True' if user[3] else 'False':>8} |{user[4]:>11} |")
+    print(connector)
+    getpass('\nPress enter to continue.')
 
 def getAllUsers():
-    data = command("""
+    printUsers(command("""
 SELECT Users.Username,
 Users.FirstName,
 Users.SurName,
-Users.created
-FROM Users""")
-    return data
+Users.isAdmin,
+Users.Created
+FROM Users"""))
 
 
 def getAllUsernames():
-    data = command("""
+    data=command("""
 SELECT Users.Username
 FROM Users""")
     return data
 
 
 def printUserDetails(Username):
-    Username, Password, isAdmin, FirstName, SurName, Created = getUserDetails(
+    Username, Password, isAdmin, FirstName, SurName, Created=getUserDetails(
         Username)
     connector = '+' + '-' * 15 + '+' + '-' * 19 + '+' + '-' * 10 + \
         '+' + '-' * 13 + '+' + '-' * 17 + '+' + '-' * 13 + '+'
@@ -394,13 +457,16 @@ def getEditableDate():
     consoleClear()
     while True:
         try:
-            Year = input('What year was account created: ')
-            Month = input('What month was account created: ')
-            Day = input('What day was account created: ')
-            date = dt.date(Year, Month, Day)
+            Year = int(input('What year was account created: '))
+            Month = int(input('What month was account created: '))
+            Day = int(input('What day was account created: '))
+            newDate = dt.date(Year, Month, Day)
+            break
         except:
             getpass('Invalid time entered. Press enter to try again.')
-    return date.strftime('%d/%m%Y')
+
+    print(newDate.strftime('%d/%m%Y'))
+    return newDate.strftime('%d/%m%Y')
 
 
 def getCurrentDate():
