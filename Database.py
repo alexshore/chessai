@@ -77,12 +77,27 @@ INSERT INTO Matches(Username, DateOfGame, Won, Side, AIDepth, Moves, PiecesLeft,
             username, date, won, side, depth, moves, piecesLeft, endPointAdvantage)
 
 
-def getRecentMatches():
-    return command("SELECT * FROM Matches")[-10::]
+def checkPageNo(page, pages):
+    if not page:
+        return
 
 
-def printRecentMatches():
-    matches = getRecentMatches()
+def getMatches(x=0, y=0, z=-1):
+    return command("SELECT * FROM Matches")[x:y:z], len(command("SELECT * FROM Matches"))
+
+
+def viewAllMatches():
+    page = 4
+    while True:
+        matches, len = getMatches(((page - 1) * -10) - 1, (page * -10) - 1)
+        pages = len / 10 if len % 10 == 0 else (len // 10 ) + 1
+        printMatches(matches[::-1])
+        print(f'Currently on page {page}/{pages}.')
+        page = input('New page (Leave blank to return to menu): ')[0]
+        correct = checkPageNo(page, pages)
+
+
+def printMatches(matches):
     connector = '+'
     for i in [14, 12, 7, 7, 9, 7, 12, 16]:
         connector += '-' * i + '+'
@@ -94,7 +109,6 @@ def printRecentMatches():
         print(f"|{match[1]:>13} |{match[2]:>11} |{'True' if match[3] else 'False':>6} "
               + f'|{match[4]:>6} |{match[5]:>8} |{match[6]:>6} |{match[7]:>11} |{match[8]:>15} |')
     print(connector)
-    getpass('Press enter to continue.')
 
 
 def addInitUser():
@@ -225,15 +239,15 @@ AND Users.Password = ?
 
 
 def printUsers(users):
+    consoleClear()
     connector = '+' + '-' * 14 + '+' + '-' * 13 + '+' + '-' * 17 + '+' + '-' * 9  + '+' + '-' * 12 + '+'
     print(connector)
     print(f"|{'Username':>13} |{'Firstname':>12} |{'Surname':>16} |{'isAdmin':>8} |{'Created':>11} |")
     print(connector)
     for user in users:
-        print(type(user[3]))
-        print(user[3])
         print(
-            f"|{user[0]:>13} |{user[1]:>12} |{user[2]:>16} |{'True' if user[3] else 'False':>8} |{user[4]:>11} |")
+            f"|{user[0]:>13} |{user[1]:>12} |{user[2]:>16} |" + \
+            f"{'True' if user[3] else 'False':>8} |{user[4]:>11} |")
     print(connector)
     getpass('\nPress enter to continue.')
 
@@ -377,11 +391,11 @@ AND Users.Password = ?
         if data:
             sessionData = getSessionDetails(data[0][0])
             Username, FirstName, isAdmin = sessionData[2], sessionData[1], sessionData[0]
-            return isAdmin, FirstName, Username
+            return True, isAdmin, FirstName, Username
         else:
             tryAgain = input('Invalid username/password. Retry? (yN) ')
             if tryAgain.lower() != 'y':
-                return
+                return False
 
 
 def getUsername():
@@ -465,8 +479,8 @@ def getEditableDate():
         except:
             getpass('Invalid time entered. Press enter to try again.')
 
-    print(newDate.strftime('%d/%m%Y'))
-    return newDate.strftime('%d/%m%Y')
+    print(newDate.strftime('%d/%m/%Y'))
+    return newDate.strftime('%d/%m/%Y')
 
 
 def getCurrentDate():
@@ -474,14 +488,14 @@ def getCurrentDate():
 
 
 def getSecurity():
-    consoleClear()
     data = getSecurityQuestions()
     while True:
+        consoleClear()
         print('Security Questions:')
         for i in range(len(data)):
             print('{} - {}'.format(data[i][0], data[i][1]))
         SID = int(input('Option: ')[0])
-        if SID not in [i for i in range(1, len(data))]:
+        if SID not in [i + 1 for i in range(len(data))]:
             getpass('\nInvalid choice. Press enter to try again.')
         else:
             break
@@ -548,7 +562,9 @@ def getWinsByUser(Username):
 
 
 def getWinRateByUser(Username):
-    return int(round(getWinsByUser(Username) / getMatchesByUser(Username) * 100, 0))
+    if getMatchesByUser(Username):
+        return int(round(getWinsByUser(Username) / getMatchesByUser(Username) * 100, 0))
+    return 'N/A'
 
 
 def getListStats(list):
@@ -563,38 +579,44 @@ def getFieldByUser(Field, Username):
 
 
 def getPiecesByUser(Username):
-    return getFieldByUser('PiecesLeft', Username)
+    if getMatchesByUser(Username):
+        return getFieldByUser('PiecesLeft', Username)
+    return ['N/A' for n in range(3)]
 
 
 def getPointsByUser(Username):
-    return getFieldByUser('PointAdvantage', Username)
+    if getMatchesByUser(Username):
+        return getFieldByUser('PointAdvantage', Username)
+    return ['N/A' for n in range(3)]
 
 
 def getMovesByUser(Username):
-    return getFieldByUser('Moves', Username)
+    if getMatchesByUser(Username):
+        return getFieldByUser('Moves', Username)
+    return ['N/A' for n in range(3)]
 
 
 def getLastGameDate(Username):
-    return command("SELECT DateOfGame FROM Matches WHERE Username = ?", Username)[-1][0]
-
+    if getMatchesByUser(Username):
+        return command("SELECT DateOfGame FROM Matches WHERE Username = ?", Username)[-1][0]
+    return 'N/A'
 
 def getAIDepthByUser(Username):
-    data = command(
-        "SELECT AIDepth FROM Matches WHERE Username = ?", Username)[:-10]
-    return mode([n[0] for n in data])
-
+    if getMatchesByUser(Username):
+        data = command(
+            "SELECT AIDepth FROM Matches WHERE Username = ?", Username)[:-10]
+        return mode([n[0] for n in data])
+    return 'N/A'
 
 def getStats(Username):
-    allStats = []
-    allStats.extend([getMatchesByUser(Username),
-                     getWinsByUser(Username),
-                     getWinRateByUser(Username),
-                     getPiecesByUser(Username),
-                     getPointsByUser(Username),
-                     getMovesByUser(Username),
-                     getLastGameDate(Username),
-                     getAIDepthByUser(Username)])
-    printStats(allStats)
+    printStats([getMatchesByUser(Username),
+                getWinsByUser(Username),
+                getWinRateByUser(Username),
+                getPiecesByUser(Username),
+                getPointsByUser(Username),
+                getMovesByUser(Username),
+                getLastGameDate(Username),
+                getAIDepthByUser(Username)])
 
 
 def printStats(stats):

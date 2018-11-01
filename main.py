@@ -18,29 +18,28 @@ def accountMenu():
     print('1 - Log in.')
     print('2 - Create account.')
     print('3 - Forgotten password.')
-    print('4 - Reboot DB.')
     print('0 - Quit.')
-    return int(input('Option: ')[0])
+    while True:
+        try:
+            return int(input('Option: ')[0])
+        except:
+            print('Invalid input. Enter a valid number only.\n')
 
 
 def main():
     while True:
         menuChoice = accountMenu()
         if menuChoice == 1:
-            data = []
-            data.append(DB.logIn())
-            print(data)
-            if data:
-                userSession = Session(data[0][0], data[0][1], data[0][2])
+            data = [DB.logIn()]
+            input(data)
+            if data[0]:
+                userSession = Session(data[0][1], data[0][2], data[0][3])
                 userSession.startSession()
         elif menuChoice == 2:
             DB.createAccount()
             input('User created. You may now login. Press enter to continue.')
         elif menuChoice == 3:
             DB.forgotPassword()
-        elif menuChoice == 4:
-            DB.bootDB()
-            input('Database reset. Press enter to continue.')
         elif not menuChoice:
             return
         else:

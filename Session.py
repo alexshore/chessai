@@ -28,21 +28,21 @@ class Session():
         self.consoleClear()
         if self.isAdmin:
             print(f'Welcome, {self.firstName} - Admin priveleges enabled.\n')
-            print('0 - Admin menu.\n')
+            print('9 - Admin menu.\n')
         else:
             print(f'Welcome, {self.firstName}.\n')
         print('1 - Start a game.')
         print('2 - View your stats.')
         print('3 - Edit account settings.')
-        print('4 - Log out.')
+        print('0 - Log out.')
         return self.getInput()
 
     def startSession(self):
         while True:
             choice = self.printMainMenu()
-            if choice == 4:
+            if not choice:
                 return
-            elif choice == 0 and self.isAdmin:
+            elif choice == 9 and self.isAdmin:
                 self.adminMenu()
             elif choice == 2:
                 DB.getStats(self.username)
@@ -70,7 +70,7 @@ class Session():
             if not adminChoice:
                 return
             elif adminChoice == 1:
-                DB.printRecentMatches()
+                self.matchesMenu()
             elif adminChoice == 2:
                 self.adminUserMenu()
             elif adminChoice == 3:
@@ -81,6 +81,27 @@ class Session():
                     getpass('Database rebooted. Press enter to continue.')
             else:
                 getpass('Unable to parse input. Press enter to re-try.')
+
+    def printMatchesMenu(self):
+        self.consoleClear()
+        print('- Matches Menu. \n')
+        print('1 - View all matches.')
+        print('2 - View matches by username.')
+        print('3 - View matches by date of match.')
+        print('0 - Back to admin menu.')
+        return self.getInput()
+
+    def matchesMenu(self):
+        while True:
+            matchChoice = self.printMatchesMenu()
+            if not matchChoice:
+                return
+            elif matchChoice == 1:
+                DB.viewAllMatches()
+            elif matchChoice == 2:
+                DB.viewMatchesByUser()
+            elif matchChoice == 3:
+                DB.viewMatchesByDate()
 
     def printTestingMenu(self):
         self.consoleClear()
@@ -154,12 +175,12 @@ class Session():
 
     def printUserSearchMenu(self):
         self.consoleClear()
-        print('- User search menu. -\n')
-        print('1 - Search by username.')
-        print('2 - Search by firstname.')
-        print('3 - Search by lastname.')
-        print('4 - Search by creation date.')
-        print('5 - Search by account type.')
+        print('Search by:\n')
+        print('1 - Username.')
+        print('2 - Firstname.')
+        print('3 - Lastname.')
+        print('4 - Creation date.')
+        print('5 - Account type.')
         print('0 - Back to user menu.')
         return self.getInput()
 
