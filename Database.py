@@ -79,7 +79,10 @@ INSERT INTO Matches(Username, DateOfGame, Won, Side, AIDepth, Moves, PiecesLeft,
 
 def checkPageNo(page, pages):
     if not page:
-        return
+        return 0
+    try:
+        page = int(page)
+        if page <= pages and page >= 1
 
 
 def getMatches(x=0, y=0, z=-1):
