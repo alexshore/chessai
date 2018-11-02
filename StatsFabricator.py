@@ -17,4 +17,4 @@ def fabricate(n):
 
 
 if __name__ == '__main__':
-    fabricate(30)
+    fabricate(100)

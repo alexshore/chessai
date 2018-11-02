@@ -80,32 +80,66 @@ INSERT INTO Matches(Username, DateOfGame, Won, Side, AIDepth, Moves, PiecesLeft,
 def checkPageNo(page, pages):
     try:
         page = int(page[0])
-        if page <= pages and page >= 1:
+        if page > pages or page < 1:
+            return False
+        else:
             return page
     except:
         return False
 
 
 def getMatches(x=0, y=0, z=-1):
-    return command("SELECT * FROM Matches")[x:y:z], len(command("SELECT * FROM Matches"))
+    data = command("SELECT * FROM Matches")[x:y:z]
+    return data, len(data)
+
+
+def getMatchesByField(Field, Search=None, x=0, y=0, z=-1):
+    if not Field:
+        data = command("SELECT * FROM Matches")
+    else:
+        data = command(
+            "SELECT * FROM Matches WHERE {} = ?".format(Field), Search)
+    return data[x:y:z], len(data)
+
+
+def viewMatches(Field, Search):
+    page = 1
+    while True:
+        matches, len = getMatchesByField(
+            Field, Search, ((page - 1) * -10) - 1, (page * -10) - 1)
+        pages = int(len / 10 if len % 10 == 0 else (len // 10) + 1)
+        printMatches(matches[::-1])
+        print(f'Currently on page {page}/{pages}.')
+        newPage = input('Go to page: (Leave blank to return to menu) ')
+        if newPage:
+            correct = checkPageNo(newPage, pages)
+            if correct:
+                page = correct
+        else:
+            break
 
 
 def viewAllMatches():
-    page = 1
+    viewMatches(False)
+
+
+def viewMatchesByUser():
     while True:
-        matches, len = getMatches(((page - 1) * -10) - 1, (page * -10) - 1)
-        pages = len / 10 if len % 10 == 0 else (len // 10 ) + 1
-        printMatches(matches[::-1])
-        print(f'Currently on page {page}/{pages}.')
-        page = input('New page (Leave blank to return to menu): ')
-        if page:
-            correct = checkPageNo(page, pages)
-            if correct:
-                page = correct
-            elif correct == False:
-                break
-        else:
+        consoleClear()
+        Search = input('Search for matches by username: ')
+        if checkUsernameExists(Search):
             break
+        else:
+            retry = input(
+                '\nUnfortunately that user doesn\'t exist. Retry? (yN) ')[0]
+            if retry.lower() != 'y':
+                return
+    viewMatches('Username', Search)
+
+
+def viewMatchesByDate():
+    Search = getEditableDate()
+    viewMatches('DateOfGame', Search)
 
 
 def printMatches(matches):
@@ -252,16 +286,18 @@ AND Users.Password = ?
 
 def printUsers(users):
     consoleClear()
-    connector = '+' + '-' * 14 + '+' + '-' * 13 + '+' + '-' * 17 + '+' + '-' * 9  + '+' + '-' * 12 + '+'
+    connector = '+' + '-' * 14 + '+' + '-' * 13 + '+' + \
+        '-' * 17 + '+' + '-' * 9 + '+' + '-' * 12 + '+'
     print(connector)
     print(f"|{'Username':>13} |{'Firstname':>12} |{'Surname':>16} |{'isAdmin':>8} |{'Created':>11} |")
     print(connector)
     for user in users:
         print(
-            f"|{user[0]:>13} |{user[1]:>12} |{user[2]:>16} |" + \
-            f"{'True' if user[3] else 'False':>8} |{user[4]:>11} |")
+            f"|{user[0]:>13} |{user[1]:>12} |{user[2]:>16} |"
+            + f"{'True' if user[3] else 'False':>8} |{user[4]:>11} |")
     print(connector)
     getpass('\nPress enter to continue.')
+
 
 def getAllUsers():
     printUsers(command("""
@@ -274,14 +310,14 @@ FROM Users"""))
 
 
 def getAllUsernames():
-    data=command("""
+    data = command("""
 SELECT Users.Username
 FROM Users""")
     return data
 
 
 def printUserDetails(Username):
-    Username, Password, isAdmin, FirstName, SurName, Created=getUserDetails(
+    Username, Password, isAdmin, FirstName, SurName, Created = getUserDetails(
         Username)
     connector = '+' + '-' * 15 + '+' + '-' * 19 + '+' + '-' * 10 + \
         '+' + '-' * 13 + '+' + '-' * 17 + '+' + '-' * 13 + '+'
@@ -374,6 +410,7 @@ def changePassword(Username):
 
 def checkPasswordMatch(Username):
     while True:
+        consoleClear()
         Password = getpass('Old password: ')
         data = command("""
 SELECT Users.Username
@@ -384,7 +421,7 @@ AND Users.Password = ?
         if data:
             return True
         else:
-            retry = input('Invalid password. Retry? (yN) ')
+            retry = input('\nInvalid password. Retry? (yN) ')
             if retry.lower() != 'y':
                 return False
 
@@ -483,15 +520,13 @@ def getEditableDate():
     consoleClear()
     while True:
         try:
-            Year = int(input('What year was account created: '))
-            Month = int(input('What month was account created: '))
-            Day = int(input('What day was account created: '))
+            Day = int(input('Ender day: '))
+            Month = int(input('Enter month: '))
+            Year = int(input('Enter year: '))
             newDate = dt.date(Year, Month, Day)
             break
         except:
             getpass('Invalid time entered. Press enter to try again.')
-
-    print(newDate.strftime('%d/%m/%Y'))
     return newDate.strftime('%d/%m/%Y')
 
 
@@ -562,7 +597,7 @@ def forgotPassword():
                 return
 
 
-def getMatchesByUser(Username):
+def getPlayedByUser(Username):
     data = command("SELECT * FROM Matches WHERE Username = ?", Username)
     return len(data)
 
@@ -574,8 +609,8 @@ def getWinsByUser(Username):
 
 
 def getWinRateByUser(Username):
-    if getMatchesByUser(Username):
-        return int(round(getWinsByUser(Username) / getMatchesByUser(Username) * 100, 0))
+    if getPlayedByUser(Username):
+        return int(round(getWinsByUser(Username) / getPlayedByUser(Username) * 100, 0))
     return 'N/A'
 
 
@@ -591,37 +626,39 @@ def getFieldByUser(Field, Username):
 
 
 def getPiecesByUser(Username):
-    if getMatchesByUser(Username):
+    if getPlayedByUser(Username):
         return getFieldByUser('PiecesLeft', Username)
     return ['N/A' for n in range(3)]
 
 
 def getPointsByUser(Username):
-    if getMatchesByUser(Username):
+    if getPlayedByUser(Username):
         return getFieldByUser('PointAdvantage', Username)
     return ['N/A' for n in range(3)]
 
 
 def getMovesByUser(Username):
-    if getMatchesByUser(Username):
+    if getPlayedByUser(Username):
         return getFieldByUser('Moves', Username)
     return ['N/A' for n in range(3)]
 
 
 def getLastGameDate(Username):
-    if getMatchesByUser(Username):
+    if getPlayedByUser(Username):
         return command("SELECT DateOfGame FROM Matches WHERE Username = ?", Username)[-1][0]
     return 'N/A'
 
+
 def getAIDepthByUser(Username):
-    if getMatchesByUser(Username):
+    if getPlayedByUser(Username):
         data = command(
             "SELECT AIDepth FROM Matches WHERE Username = ?", Username)[:-10]
         return mode([n[0] for n in data])
     return 'N/A'
 
+
 def getStats(Username):
-    printStats([getMatchesByUser(Username),
+    printStats([getPlayedByUser(Username),
                 getWinsByUser(Username),
                 getWinRateByUser(Username),
                 getPiecesByUser(Username),
@@ -639,13 +676,13 @@ def printStats(stats):
     print(f"{'Percentage win rate: ':<30}" + f'{stats[2]:>10}')
     print(f"{'Common AI depth (recent): ':<30}" + f'{stats[7]:>10}')
     print(f"{'Last played game: ':<30}" + f'{stats[6]:>10}\n')
-    print('- More stats (most-least-average). -\n')
+    print('- More stats (most / least / average). -\n')
     print(f"{'Pieces left:':<20}" +
-          f'{stats[3][0]:^3}/{stats[3][1]:^3}/{stats[3][2]:>3}')
+          f'{stats[3][0]:>4} /{stats[3][1]:>4} /{stats[3][2]:>4}')
     print(f"{'Point advantage:':<20}" +
-          f'{stats[4][0]:^3}/{stats[4][1]:^3}/{stats[4][2]:>3}')
+          f'{stats[4][0]:>4} /{stats[4][1]:>4} /{stats[4][2]:>4}')
     print(f"{'Moves made: ':<20}" +
-          f'{stats[5][0]:^3}/{stats[5][1]:^3}/{stats[5][2]:>3}\n')
+          f'{stats[5][0]:>4} /{stats[5][1]:>4} /{stats[5][2]:>4}\n')
     getpass('Press enter to continue:')
 
 

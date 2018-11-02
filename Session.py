@@ -160,9 +160,9 @@ class Session():
             elif menuChoice == 2:
                 while True:
                     self.consoleClear()
-                    DB.printUsers()
+                    DB.getAllUsers()
                     Username = input(
-                        '\nWhich user would you like to edit? (case-sensitive) ')
+                        '\nWhich user would you like to edit? (username) ')
                     if DB.checkUsernameExists(Username):
                         DB.editUser(True, Username)
                         break
