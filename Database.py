@@ -78,11 +78,12 @@ INSERT INTO Matches(Username, DateOfGame, Won, Side, AIDepth, Moves, PiecesLeft,
 
 
 def checkPageNo(page, pages):
-    if not page:
-        return 0
     try:
-        page = int(page)
-        if page <= pages and page >= 1
+        page = int(page[0])
+        if page <= pages and page >= 1:
+            return page
+    except:
+        return False
 
 
 def getMatches(x=0, y=0, z=-1):
@@ -90,17 +91,25 @@ def getMatches(x=0, y=0, z=-1):
 
 
 def viewAllMatches():
-    page = 4
+    page = 1
     while True:
         matches, len = getMatches(((page - 1) * -10) - 1, (page * -10) - 1)
         pages = len / 10 if len % 10 == 0 else (len // 10 ) + 1
         printMatches(matches[::-1])
         print(f'Currently on page {page}/{pages}.')
-        page = input('New page (Leave blank to return to menu): ')[0]
-        correct = checkPageNo(page, pages)
+        page = input('New page (Leave blank to return to menu): ')
+        if page:
+            correct = checkPageNo(page, pages)
+            if correct:
+                page = correct
+            elif correct == False:
+                break
+        else:
+            break
 
 
 def printMatches(matches):
+    consoleClear()
     connector = '+'
     for i in [14, 12, 7, 7, 9, 7, 12, 16]:
         connector += '-' * i + '+'

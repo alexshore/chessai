@@ -161,7 +161,6 @@ def startGame(board, playerSide, ai, username):
         #     return
         if board.currentSide == playerSide:
             printPointAdvantage(board)
-            print(f'total moves made: {board.movesMade}')
             move = None
             command = input('It\'s your move. '
                             'Type \'?\' for options: ').lower()
