@@ -88,12 +88,7 @@ def checkPageNo(page, pages):
         return False
 
 
-def getMatches(x=0, y=0, z=-1):
-    data = command("SELECT * FROM Matches")[x:y:z]
-    return data, len(data)
-
-
-def getMatchesByField(Field, Search=None, x=0, y=0, z=-1):
+def getMatchesByField(Field, Search, x=0, y=0, z=-1):
     if not Field:
         data = command("SELECT * FROM Matches")
     else:
@@ -102,21 +97,41 @@ def getMatchesByField(Field, Search=None, x=0, y=0, z=-1):
     return data[x:y:z], len(data)
 
 
-def viewMatches(Field, Search):
+def viewMatches(Field, Search=None):
     page = 1
     while True:
         matches, len = getMatchesByField(
             Field, Search, ((page - 1) * -10) - 1, (page * -10) - 1)
-        pages = int(len / 10 if len % 10 == 0 else (len // 10) + 1)
-        printMatches(matches[::-1])
-        print(f'Currently on page {page}/{pages}.')
-        newPage = input('Go to page: (Leave blank to return to menu) ')
-        if newPage:
-            correct = checkPageNo(newPage, pages)
-            if correct:
-                page = correct
-        else:
+        if not matches:
+            getpass('\nNo matches found from that search. Press enter return.')
             break
+        else:
+            pages = int(len / 10 if len % 10 == 0 else (len // 10) + 1)
+            printMatches(matches[::-1])
+            print(f'Currently on page {page}/{pages}.')
+            newPage = input(
+                'Enter new page num or leave blank to return to menu: ')
+            if newPage:
+                correct = checkPageNo(newPage, pages)
+                if correct:
+                    page = correct
+            else:
+                break
+
+
+def printMatches(matches):
+    consoleClear()
+    connector = '+'
+    for i in [14, 12, 7, 7, 9, 7, 12, 16]:
+        connector += '-' * i + '+'
+    header = f"|{'Username':>13} |{'DateOfGame':>11} |{'Won':>6} " + \
+             f"|{'Side':>6} |{'AIDepth':>8} |{'Moves':>6} " + \
+             f"|{'PiecesLeft':>11} |{'PointAdvantage':>15} |\n"
+    print(connector + '\n' + header + connector)
+    for match in matches[::-1]:
+        print(f"|{match[1]:>13} |{match[2]:>11} |{'True' if match[3] else 'False':>6} " +
+              f'|{match[4]:>6} |{match[5]:>8} |{match[6]:>6} |{match[7]:>11} |{match[8]:>15} |')
+    print(connector)
 
 
 def viewAllMatches():
@@ -130,31 +145,14 @@ def viewMatchesByUser():
         if checkUsernameExists(Search):
             break
         else:
-            retry = input(
-                '\nUnfortunately that user doesn\'t exist. Retry? (yN) ')[0]
-            if retry.lower() != 'y':
-                return
+            getpass('\nNo matches found from that search. Press enter return.')
+            break
     viewMatches('Username', Search)
 
 
 def viewMatchesByDate():
     Search = getEditableDate()
     viewMatches('DateOfGame', Search)
-
-
-def printMatches(matches):
-    consoleClear()
-    connector = '+'
-    for i in [14, 12, 7, 7, 9, 7, 12, 16]:
-        connector += '-' * i + '+'
-    header = f"|{'Username':>13} |{'DateOfGame':>11} |{'Won':>6} " + \
-             f"|{'Side':>6} |{'AIDepth':>8} |{'Moves':>6} " + \
-             f"|{'PiecesLeft':>11} |{'PointAdvantage':>15} |\n"
-    print(connector + '\n' + header + connector)
-    for match in matches[::-1]:
-        print(f"|{match[1]:>13} |{match[2]:>11} |{'True' if match[3] else 'False':>6} "
-              + f'|{match[4]:>6} |{match[5]:>8} |{match[6]:>6} |{match[7]:>11} |{match[8]:>15} |')
-    print(connector)
 
 
 def addInitUser():
@@ -172,54 +170,78 @@ def addNewUser(username, password, isAdmin, firstName, surName, date, SID, answe
             surName, date, SID, answer)
 
 
-def searchByField(Field, Search):
-    return command("""
-SELECT Users.Username,
-Users.FirstName,
-Users.SurName,
-Users.isAdmin,
-Users.Created
-FROM Users WHERE {} = ?""".format(Field), Search)
+def getUsersByField(Field, Search, x=0, y=0, z=1):
+    if not Field:
+        data = command("SELECT * FROM Users ORDER BY SurName")
+    else:
+        data = command(
+            "SELECT * FROM Users WHERE {} = ? ORDER BY SurName".format(Field), Search)
+    return data[x:y:z], len(data)
+
+
+def viewUsers(Field, Search=None):
+    page = 1
+    while True:
+        users, len = getUsersByField(
+            Field, Search, (page - 1) * 10, page * 10)
+        if not users:
+            getpass('No users found from that search. Press enter to return')
+            break
+        else:
+            pages = int(len / 10 if len % 10 == 0 else (len // 10) + 1)
+            printUsers(users)
+            print(f'Currently on page {page}/{pages}.')
+            newPage = input(
+                'Enter new page num or leave blank to return to menu: ')
+            if newPage:
+                correct = checkPageNo(newPage, pages)
+                if correct:
+                    page = correct
+            else:
+                break
+
+
+def printUsers(users):
+    consoleClear()
+    connector = '+'
+    for i in [14, 13, 17, 9, 12]:
+        connector += '-' * i + '+'
+    header = f"|{'Username':>13} |{'Firstname':>12} |{'Surname':>16} " + \
+             f"|{'isAdmin':>8} |{'Created':>11} |\n"
+    print(connector + '\n' + header + connector)
+    for user in users:
+        print(
+            f"|{user[0]:>13} |{user[3]:>12} |{user[4]:>16} |" +
+            f"{'True' if user[2] else 'False':>8} |{user[5]:>11} |")
+    print(connector)
+
+
+def viewAllUsers():
+    viewUsers(False)
 
 
 def searchByUsername():
     consoleClear()
     Search = input('Enter username to search for: ')
-    data = searchByField('Username', Search)
-    if data:
-        printUsers(data)
-    else:
-        getpass('No user(s) found. Press enter to return to menu.')
+    viewUsers('Username', Search)
 
 
 def searchByFirstname():
     consoleClear()
     Search = input('Enter firstname to search for: ')
-    data = searchByField('FirstName', Search)
-    if data:
-        printUsers(data)
-    else:
-        getpass('No user(s) found. Press enter to return to menu.')
+    viewUsers('FirstName', Search)
 
 
 def searchByLastname():
     consoleClear()
     Search = input('Enter lastname to search for: ')
-    data = searchByField('SurName', Search)
-    if data:
-        printUsers(data)
-    else:
-        getpass('No user(s) found. Press enter to return to menu.')
+    viewUsers('SurName', Search)
 
 
 def searchByDate():
     consoleClear()
     Search = getEditableDate()
-    data = searchByField('Created', Search)
-    if data:
-        printUsers(data)
-    else:
-        getpass('No user(s) found. Press enter to return to menu.')
+    viewUsers('Created', Search)
 
 
 def searchByAdmin():
@@ -228,11 +250,7 @@ def searchByAdmin():
     print('0 - Regular account.')
     print('1 - Admin account.')
     Search = int(input('Option: ')[0])
-    data = searchByField('isAdmin', Search)
-    if data:
-        printUsers(data)
-    else:
-        getpass('No user(s) found. Press enter to return to menu.')
+    viewUsers('isAdmin', Search)
 
 
 def checkUsernameExists(Username):
@@ -284,29 +302,14 @@ AND Users.Password = ?
     return data
 
 
-def printUsers(users):
-    consoleClear()
-    connector = '+' + '-' * 14 + '+' + '-' * 13 + '+' + \
-        '-' * 17 + '+' + '-' * 9 + '+' + '-' * 12 + '+'
-    print(connector)
-    print(f"|{'Username':>13} |{'Firstname':>12} |{'Surname':>16} |{'isAdmin':>8} |{'Created':>11} |")
-    print(connector)
-    for user in users:
-        print(
-            f"|{user[0]:>13} |{user[1]:>12} |{user[2]:>16} |"
-            + f"{'True' if user[3] else 'False':>8} |{user[4]:>11} |")
-    print(connector)
-    getpass('\nPress enter to continue.')
-
-
 def getAllUsers():
-    printUsers(command("""
+    return command("""
 SELECT Users.Username,
 Users.FirstName,
 Users.SurName,
 Users.isAdmin,
 Users.Created
-FROM Users"""))
+FROM Users ORDER BY Users.SurName""")
 
 
 def getAllUsernames():
@@ -322,11 +325,11 @@ def printUserDetails(Username):
     connector = '+' + '-' * 15 + '+' + '-' * 19 + '+' + '-' * 10 + \
         '+' + '-' * 13 + '+' + '-' * 17 + '+' + '-' * 13 + '+'
     print(connector)
-    print(f"|{'Username':>14} |{'Password':>18} |{'isAdmin':>9} " +
-          f"|{'FirstName':>12} |{'SurName':>16} |{'Created':>12} |")
+    print(f"|{'Username':>14} |{'Password':>18} |{'isAdmin':>9} "
+          + f"|{'FirstName':>12} |{'SurName':>16} |{'Created':>12} |")
     print(connector)
-    print(f"|{Username:>14} |{Password:>18} |{isAdmin:>9} " +
-          f"|{FirstName:>12} |{SurName:>16} |{Created:>12} |")
+    print(f"|{Username:>14} |{Password:>18} |{isAdmin:>9} "
+          + f"|{FirstName:>12} |{SurName:>16} |{Created:>12} |")
     print(connector + '\n')
 
 
@@ -611,7 +614,7 @@ def getWinsByUser(Username):
 def getWinRateByUser(Username):
     if getPlayedByUser(Username):
         return int(round(getWinsByUser(Username) / getPlayedByUser(Username) * 100, 0))
-    return 'N/A'
+    return 'NA'
 
 
 def getListStats(list):
@@ -628,25 +631,25 @@ def getFieldByUser(Field, Username):
 def getPiecesByUser(Username):
     if getPlayedByUser(Username):
         return getFieldByUser('PiecesLeft', Username)
-    return ['N/A' for n in range(3)]
+    return ['NA' for n in range(3)]
 
 
 def getPointsByUser(Username):
     if getPlayedByUser(Username):
         return getFieldByUser('PointAdvantage', Username)
-    return ['N/A' for n in range(3)]
+    return ['NA' for n in range(3)]
 
 
 def getMovesByUser(Username):
     if getPlayedByUser(Username):
         return getFieldByUser('Moves', Username)
-    return ['N/A' for n in range(3)]
+    return ['NA' for n in range(3)]
 
 
 def getLastGameDate(Username):
     if getPlayedByUser(Username):
         return command("SELECT DateOfGame FROM Matches WHERE Username = ?", Username)[-1][0]
-    return 'N/A'
+    return 'NA'
 
 
 def getAIDepthByUser(Username):
@@ -654,7 +657,7 @@ def getAIDepthByUser(Username):
         data = command(
             "SELECT AIDepth FROM Matches WHERE Username = ?", Username)[:-10]
         return mode([n[0] for n in data])
-    return 'N/A'
+    return 'NA'
 
 
 def getStats(Username):
@@ -677,12 +680,12 @@ def printStats(stats):
     print(f"{'Common AI depth (recent): ':<30}" + f'{stats[7]:>10}')
     print(f"{'Last played game: ':<30}" + f'{stats[6]:>10}\n')
     print('- More stats (most / least / average). -\n')
-    print(f"{'Pieces left:':<20}" +
-          f'{stats[3][0]:>4} /{stats[3][1]:>4} /{stats[3][2]:>4}')
-    print(f"{'Point advantage:':<20}" +
-          f'{stats[4][0]:>4} /{stats[4][1]:>4} /{stats[4][2]:>4}')
-    print(f"{'Moves made: ':<20}" +
-          f'{stats[5][0]:>4} /{stats[5][1]:>4} /{stats[5][2]:>4}\n')
+    print(f"{'Pieces left:':<20}"
+          + f'{stats[3][0]:>4} /{stats[3][1]:>4} /{stats[3][2]:>4}')
+    print(f"{'Point advantage:':<20}"
+          + f'{stats[4][0]:>4} /{stats[4][1]:>4} /{stats[4][2]:>4}')
+    print(f"{'Moves made: ':<20}"
+          + f'{stats[5][0]:>4} /{stats[5][1]:>4} /{stats[5][2]:>4}\n')
     getpass('Press enter to continue:')
 
 

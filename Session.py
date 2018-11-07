@@ -58,8 +58,8 @@ class Session():
     def printAdminMenu(self):
         self.consoleClear()
         print('- Admin Menu. -\n')
-        print('1 - View recent matches.')
-        print('2 - Edit/View all users.')
+        print('1 - Matches menu.')
+        print('2 - Users menu.')
         print('3 - Reset database.')
         print('0 - Back to main menu.')
         return self.getInput()
@@ -70,7 +70,7 @@ class Session():
             if not adminChoice:
                 return
             elif adminChoice == 1:
-                self.matchesMenu()
+                self.adminMatchesMenu()
             elif adminChoice == 2:
                 self.adminUserMenu()
             elif adminChoice == 3:
@@ -82,7 +82,7 @@ class Session():
             else:
                 getpass('Unable to parse input. Press enter to re-try.')
 
-    def printMatchesMenu(self):
+    def printAdminMatchesMenu(self):
         self.consoleClear()
         print('- Matches Menu. \n')
         print('1 - View all matches.')
@@ -91,9 +91,9 @@ class Session():
         print('0 - Back to admin menu.')
         return self.getInput()
 
-    def matchesMenu(self):
+    def adminMatchesMenu(self):
         while True:
-            matchChoice = self.printMatchesMenu()
+            matchChoice = self.printAdminMatchesMenu()
             if not matchChoice:
                 return
             elif matchChoice == 1:
@@ -124,6 +124,7 @@ class Session():
         print('1 - Change your password.')
         print('2 - View security info.')
         print('3 - Edit account info.')
+        print('\n9 - Delete account.\n')
         print('0 - Back to main menu.')
         return self.getInput()
 
@@ -138,15 +139,18 @@ class Session():
                 DB.viewSecurity(self.username)
             elif menuChoice == 3:
                 DB.editUser(self.isAdmin, self.username)
+            elif menuChoice == 9:
+                DB.deleteUser(self.username)
             else:
                 getpass('Unable to parse input. Press enter to re-try.')
 
     def printAdminUserMenu(self):
         self.consoleClear()
         print('- User Menu. -\n')
-        print('1 - Add new user.')
-        print('2 - Edit existing user.')
-        print('3 - Search users.')
+        print('1 - View all users.')
+        print('2 - Search all users.')
+        print('3 - Add a new user.')
+        print('4 - Edit a user.')
         print('0 - Back to admin menu.')
         return self.getInput()
 
@@ -156,13 +160,17 @@ class Session():
             if not menuChoice:
                 return
             elif menuChoice == 1:
-                DB.createAccount()
+                DB.viewAllUsers()
             elif menuChoice == 2:
+                self.userSearchMenu()
+            elif menuChoice == 3:
+                DB.createAccount()
+            elif menuChoice == 4:
                 while True:
                     self.consoleClear()
                     DB.getAllUsers()
                     Username = input(
-                        '\nWhich user would you like to edit? (username) ')
+                        '\nWhich user would you like to edit? (Username) ')
                     if DB.checkUsernameExists(Username):
                         DB.editUser(True, Username)
                         break

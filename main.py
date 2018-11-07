@@ -31,7 +31,6 @@ def main():
         menuChoice = accountMenu()
         if menuChoice == 1:
             data = [DB.logIn()]
-            input(data)
             if data[0]:
                 userSession = Session(data[0][1], data[0][2], data[0][3])
                 userSession.startSession()
