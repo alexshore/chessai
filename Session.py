@@ -3,6 +3,7 @@ import os
 import Database as DB
 import Game
 from termcolor import colored as c
+from getpass import getpass
 
 
 class Session():
@@ -16,44 +17,52 @@ class Session():
         os.system('cls')
         os.system('cls')
 
+    def getInput(self):
+        while True:
+            try:
+                return int(input('Option: ')[0])
+            except:
+                print('Invalid input. Enter a valid number only.\n')
+
     def printMainMenu(self):
         self.consoleClear()
         if self.isAdmin:
             print(f'Welcome, {self.firstName} - Admin priveleges enabled.\n')
-            print('A - Admin menu.')
+            print('9 - Admin menu.\n')
         else:
             print(f'Welcome, {self.firstName}.\n')
-        print('S - Start a game.')
-        print('V - View your stats.')
-        print('E - Edit account settings.')
-        print('T - Test functions.')
-        print('L - Log out.')
-        return input('Option: ')[0].lower()
+        print('1 - Start a game.')
+        print('2 - View your stats.')
+        print('3 - Edit account settings.')
+        print('0 - Log out.')
+        return self.getInput()
 
     def startSession(self):
         while True:
             choice = self.printMainMenu()
-            if choice == 'l':
+            if not choice:
                 return
-            elif choice == 'a' and self.isAdmin:
+            elif choice == 9 and self.isAdmin:
                 self.adminMenu()
-            elif choice == 's':
-                Game.main()
-            elif choice == 'e':
+            elif choice == 2:
+                DB.getStats(self.username)
+            elif choice == 1:
+                Game.main(self.username)
+            elif choice == 3:
                 self.accountMenu()
-            elif choice == 't':
-                self.testing()
+            elif choice == 5:
+                self.testingMenu()
             else:
-                getpass('Unable to parse input. Press enter to try again.')
+                getpass('Unable to parse input. Press enter to re-try.')
 
     def printAdminMenu(self):
         self.consoleClear()
         print('- Admin Menu. -\n')
-        print('1 - Edit/View all matches.')
-        print('2 - Edit/View all users.')
+        print('1 - Matches menu.')
+        print('2 - Users menu.')
         print('3 - Reset database.')
         print('0 - Back to main menu.')
-        return int(input('Option: ')[0])
+        return self.getInput()
 
     def adminMenu(self):
         while True:
@@ -61,7 +70,7 @@ class Session():
             if not adminChoice:
                 return
             elif adminChoice == 1:
-                print('match view thing')
+                self.adminMatchesMenu()
             elif adminChoice == 2:
                 self.adminUserMenu()
             elif adminChoice == 3:
@@ -70,30 +79,54 @@ class Session():
                 if sure.lower() == 'y':
                     DB.bootDB()
                     getpass('Database rebooted. Press enter to continue.')
+            else:
+                getpass('Unable to parse input. Press enter to re-try.')
 
-    def printTestMenu(self):
+    def printAdminMatchesMenu(self):
         self.consoleClear()
-        print('- Testing. -\n')
-        print('1 - getPiecesByUser')
-        print('0 - Return.')
-        return int(input('Option')[0])
+        print('- Matches Menu. \n')
+        print('1 - View all matches.')
+        print('2 - View matches by username.')
+        print('3 - View matches by date of match.')
+        print('0 - Back to admin menu.')
+        return self.getInput()
 
-    def testing(self):
+    def adminMatchesMenu(self):
         while True:
-            testChoice = self.printTestMenu()
+            matchChoice = self.printAdminMatchesMenu()
+            if not matchChoice:
+                return
+            elif matchChoice == 1:
+                DB.viewAllMatches()
+            elif matchChoice == 2:
+                DB.viewMatchesByUser()
+            elif matchChoice == 3:
+                DB.viewMatchesByDate()
+
+    def printTestingMenu(self):
+        self.consoleClear()
+        print('- Testing Menu. -\n')
+        print('1 - Get recent matches.')
+        print('0 - Back to main menu.')
+        return self.getInput()
+
+    def testingMenu(self):
+        while True:
+            testChoice = self.printTestingMenu()
             if not testChoice:
                 return
             elif testChoice == 1:
-                DB.getPiecesByUser(self.username)
+                input(DB.getRecentMatches())
 
     def printAccountMenu(self):
         self.consoleClear()
-        print('- Account editing. -\n')
+        print('- Account Editing. -\n')
         print('1 - Change your password.')
         print('2 - View security info.')
         print('3 - Edit account info.')
+        print('\n9 - Delete account.\n')
         print('0 - Back to main menu.')
-        return int(input('Option: ')[0])
+        return self.getInput()
 
     def accountMenu(self):
         while True:
@@ -106,15 +139,20 @@ class Session():
                 DB.viewSecurity(self.username)
             elif menuChoice == 3:
                 DB.editUser(self.isAdmin, self.username)
+            elif menuChoice == 9:
+                DB.deleteUser(self.username)
+            else:
+                getpass('Unable to parse input. Press enter to re-try.')
 
     def printAdminUserMenu(self):
         self.consoleClear()
         print('- User Menu. -\n')
-        print('1 - Add new user.')
-        print('2 - Edit existing user.')
-        print('3 - Search users.')
+        print('1 - View all users.')
+        print('2 - Search all users.')
+        print('3 - Add a new user.')
+        print('4 - Edit a user.')
         print('0 - Back to admin menu.')
-        return int(input('Option: ')[0])
+        return self.getInput()
 
     def adminUserMenu(self):
         while True:
@@ -122,20 +160,55 @@ class Session():
             if not menuChoice:
                 return
             elif menuChoice == 1:
-                DB.createAccount()
+                DB.viewAllUsers()
             elif menuChoice == 2:
+                self.userSearchMenu()
+            elif menuChoice == 3:
+                DB.createAccount()
+            elif menuChoice == 4:
                 while True:
                     self.consoleClear()
-                    DB.printAllUsers()
+                    DB.getAllUsers()
                     Username = input(
-                        '\nWhich user would you like to edit? (case-sensitive) ')
+                        '\nWhich user would you like to edit? (Username) ')
                     if DB.checkUsernameExists(Username):
                         DB.editUser(True, Username)
                         break
                     else:
                         getpass('Invalid username. Press enter to try again.')
             elif menuChoice == 3:
-                DB.printAllUsers()
+                self.userSearchMenu()
+            else:
+                getpass('Unable to parse input. Press enter to re-try.')
+
+    def printUserSearchMenu(self):
+        self.consoleClear()
+        print('Search by:\n')
+        print('1 - Username.')
+        print('2 - Firstname.')
+        print('3 - Lastname.')
+        print('4 - Creation date.')
+        print('5 - Account type.')
+        print('0 - Back to user menu.')
+        return self.getInput()
+
+    def userSearchMenu(self):
+        while True:
+            searchChoice = self.printUserSearchMenu()
+            if not searchChoice:
+                return
+            elif searchChoice == 1:
+                DB.searchByUsername()
+            elif searchChoice == 2:
+                DB.searchByFirstname()
+            elif searchChoice == 3:
+                DB.searchByLastname()
+            elif searchChoice == 4:
+                DB.searchByDate()
+            elif searchChoice == 5:
+                DB.searchByAdmin()
+            else:
+                getpass('Invalid input. Press enter to re-try.')
 
 
 if __name__ == '__main__':

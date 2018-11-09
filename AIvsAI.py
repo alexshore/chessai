@@ -61,8 +61,7 @@ def listMoves(board, parser, pawns):
     for move in moves:
         columnHead = move.piece.stringRep + \
             ' - {}'.format(move.positionToHumanCoord(move.oldPos))
-        if (pawns or move.piece.stringRep != 'p') and \
-                [columnHead, move.piece] not in movesWithPiece[0]:
+        if (pawns or move.piece.stringRep != 'p') and [columnHead, move.piece] not in movesWithPiece[0]:
             movesWithPiece.append([])
             movesWithPiece[0].append([columnHead, move.piece])
     for piece in range(len(movesWithPiece[0])):
@@ -142,73 +141,46 @@ def printCommandOptions():
     getpass('Press enter to continue.')
 
 
-def startGame(board, playerSide, ai, username):
-    parser = InputParser(board, playerSide)
+def startGame(board, firstAI, otherAI):
     while True:
+        counter = 1
         consoleClear()
         print(board)
         print()
         if board.isCheckMate():
-            if board.currentSide == playerSide:
-                print('Checkmate, you lost.')
-                win = True
+            if board.currentSide == firstAI.side:
+                print('Checkmate, firstAI won!')
             else:
-                print('Checkmate! You won!')
-                win = False
-            recordMatch(username, board, playerSide, win, ai)
+                print('Checkmate, otherAI won!')
+            input()
+            break
+        if board.isStaleMate():
+            print('Stalemate...')
             return
-        # if board.isStaleMate():
-        #     print('Stalemate...')
-        #     return
-        if board.currentSide == playerSide:
-            printPointAdvantage(board)
-            move = None
-            command = input('It\'s your move. '
-                            'Type \'?\' for options: ').lower()
-            if command == '?':
-                printCommandOptions()
-                continue
-            elif command == 'l':
-                listMoves(board, parser, False)
-                continue
-            elif command == 'll':
-                listMoves(board, parser, True)
-                continue
-            elif command == 'old':
-                legacy(board, parser)
-                continue
-            elif command == 'u':
-                undoLastTwoMoves(board)
-                continue
-            elif command == 'r':
-                move = getRandomMove(board, parser)
-            elif command == 'quit':
-                return
-            else:
-                move = parser.parse(command)
-            if move:
-                makeMove(move, board)
-            else:
-                print('Couldn\'t parse input, enter a valid command or move.')
-        elif board.currentSide == ai.side:
-            print('AI thinking...')
-            move = ai.getBestMove(False)
+        if board.currentSide == firstAI.side:
+            print('FirstAI thinking...')
+            move = firstAI.getBestMove(False)
             move.notation = move.getNotation()
             makeMove(move, board)
-            getpass('\nPress enter to continue.')
-            if board.currentSide == ai.side:
-                board.currentSide == playerSide
+            if board.currentSide == firstAI.side:
+                board.currentSide == otherAI.side
+        elif board.currentSide == otherAI.side:
+            print('AI thinking...')
+            move = otherAI.getBestMove(False)
+            move.notation = move.getNotation()
+            makeMove(move, board)
+            if board.currentSide == otherAI.side:
+                board.currentSide == firstAI.side
 
 
-def main(username):
+def main():
     consoleClear()
     board = Board()
-    playerSide = askForPlayerSide()
     print()
-    aiDepth = askForAIDepth()
-    opponentAI = AI(board, not playerSide, aiDepth)
-    startGame(board, playerSide, opponentAI, username)
+    firstAI = AI(board, False, 2)
+    otherAI = AI(board, True, 2)
+    startGame(board, firstAI, otherAI)
 
 
 if __name__ == '__main__':
-    main('ashore')
+    main()

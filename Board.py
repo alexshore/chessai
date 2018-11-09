@@ -24,7 +24,7 @@ class Board:
         self.checkmate = False
 
         if not pawnTest and not rookTest and not queenTest and not bishopTest \
-                and not knightTest and not castle and not takeTest and not promotion:
+         and not knightTest and not castle and not takeTest and not promotion:
             self.pieces.extend([Rook(self, BLACK, C(0, 7)),
                                 Knight(self, BLACK, C(1, 7)),
                                 Bishop(self, BLACK, C(2, 7)),

@@ -84,10 +84,10 @@ class AI:
 
         legalMoves = self.board.getAllMovesLegal(side)
         if not legalMoves:
-            if self.board.isCheckmate():
+            if self.board.isCheckMate():
                 node.move.checkmate = True
                 return
-            elif self.board.isStalemate():
+            elif self.board.isStaleMate():
                 node.move.stalemate = True
                 node.pointAdvantage = 0
                 return
