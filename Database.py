@@ -35,13 +35,15 @@ def createTable(sql):
 
 def createMatches():
     sql = """CREATE TABLE IF NOT EXISTS Matches
-(MatchID integer,
-Username text,
-AIDepth integer,
-DateOfGame date,
-Won boolean,
-Side text,
-Moves integer,
+(MatchID INTEGER,
+Username TEXT,
+DateOfGame TEXT,
+Won BOOLEAN,
+Side REAL,
+AIDepth INTEGER,
+Moves INTEGER,
+PiecesLeft INTEGER,
+PointAdvantage INTEGER,
 PRIMARY KEY(MatchID)
 FOREIGN KEY(Username) REFERENCES Users(Username))"""
     command(sql)
@@ -70,11 +72,36 @@ PRIMARY KEY(SecurityID))"""
     command(sql)
 
 
+def addTestMatch(username, date, won, side, depth, moves, piecesLeft, endPointAdvantage):
+    command("""
+INSERT INTO Matches(Username, DateOfGame, Won, Side, AIDepth, Moves, PiecesLeft, PointAdvantage) VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+            username, date, won, side, depth, moves, piecesLeft, endPointAdvantage)
+
+
 def addMatch(username, won, side, depth, moves, piecesLeft, endPointAdvantage):
     date = dt.datetime.today().strftime('%d/%m/%Y')
     command("""
 INSERT INTO Matches(Username, DateOfGame, Won, Side, AIDepth, Moves, PiecesLeft, PointAdvantage) VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
             username, date, won, side, depth, moves, piecesLeft, endPointAdvantage)
+
+
+def resetUser(Username):
+    command("DELETE FROM Matches WHERE Username = ?", Username)
+
+
+def deleteUser(Username):
+    command("DELETE FROM Users WHERE Username = ?", Username)
+
+
+def tryDeleteUser(Username):
+    if checkPasswordMatch(Username):
+        while True:
+            confirm = input('Enter your username to confirm deletion: ')
+            if confirm == Username:
+                resetUser(Username)
+                deleteUser(Username)
+                getpass('User has been deleted. Returning to main menu.')
+                return True
 
 
 def checkPageNo(page, pages):
@@ -414,7 +441,7 @@ def changePassword(Username):
 def checkPasswordMatch(Username):
     while True:
         consoleClear()
-        Password = getpass('Old password: ')
+        Password = getpass('Current password: ')
         data = command("""
 SELECT Users.Username
 FROM Users
@@ -487,10 +514,10 @@ def getPassword():
         print('Password must contain at least one number.')
         print('Password must not contain spaces.\n')
         while True:
-            Password = getpass('Password: ')
+            Password = getpass('New password: ')
             if checkPasswordValidity(Password):
                 break
-        confirmationPass = getpass('Please confirm password: ')
+        confirmationPass = getpass('Please confirm new password: ')
         if confirmationPass == Password:
             return Password
         else:
@@ -523,7 +550,7 @@ def getEditableDate():
     consoleClear()
     while True:
         try:
-            Day = int(input('Ender day: '))
+            Day = int(input('Enter day: '))
             Month = int(input('Enter month: '))
             Year = int(input('Enter year: '))
             newDate = dt.date(Year, Month, Day)
@@ -668,12 +695,13 @@ def getStats(Username):
                 getPointsByUser(Username),
                 getMovesByUser(Username),
                 getLastGameDate(Username),
-                getAIDepthByUser(Username)])
+                getAIDepthByUser(Username)],
+                Username)
 
 
-def printStats(stats):
+def printStats(stats, username):
     consoleClear()
-    print('- Base stats. -\n')
+    print(f'- Base stats ({username}). -\n')
     print(f"{'Total matches played: ':<30}" + f'{stats[0]:>10}')
     print(f"{'Total match wins: ':<30}" + f'{stats[1]:>10}')
     print(f"{'Percentage win rate: ':<30}" + f'{stats[2]:>10}')
@@ -684,7 +712,7 @@ def printStats(stats):
           + f'{stats[3][0]:>4} /{stats[3][1]:>4} /{stats[3][2]:>4}')
     print(f"{'Point advantage:':<20}"
           + f'{stats[4][0]:>4} /{stats[4][1]:>4} /{stats[4][2]:>4}')
-    print(f"{'Moves made: ':<20}"
+    print(f"{'Moves made:':<20}"
           + f'{stats[5][0]:>4} /{stats[5][1]:>4} /{stats[5][2]:>4}\n')
     getpass('Press enter to continue:')
 
@@ -700,7 +728,8 @@ def dump():
 
 def menu():
     print('Options:\n')
-    print('C - Create tables.')
+    print('C - Create init users.')
+    print('M - Create matches table.')
     print('D - Dump data.')
     print('B - Boot database.')
     print('Q - Quit.')
@@ -718,6 +747,8 @@ def main():
             dump()
         elif choice.lower() == 'b':
             bootDB()
+        elif choice.lower() == 'm':
+            createMatches()
         elif choice.lower() == 'q':
             return
 

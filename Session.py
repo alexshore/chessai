@@ -44,10 +44,10 @@ class Session():
                 return
             elif choice == 9 and self.isAdmin:
                 self.adminMenu()
-            elif choice == 2:
-                DB.getStats(self.username)
             elif choice == 1:
                 Game.main(self.username)
+            elif choice == 2:
+                DB.getStats(self.username)
             elif choice == 3:
                 self.accountMenu()
             elif choice == 5:
@@ -88,6 +88,7 @@ class Session():
         print('1 - View all matches.')
         print('2 - View matches by username.')
         print('3 - View matches by date of match.')
+        print('4 - Reset matches.')
         print('0 - Back to admin menu.')
         return self.getInput()
 
@@ -102,6 +103,8 @@ class Session():
                 DB.viewMatchesByUser()
             elif matchChoice == 3:
                 DB.viewMatchesByDate()
+            elif matchChoice == 4:
+                DB.resetMatches()
 
     def printTestingMenu(self):
         self.consoleClear()
@@ -124,7 +127,8 @@ class Session():
         print('1 - Change your password.')
         print('2 - View security info.')
         print('3 - Edit account info.')
-        print('\n9 - Delete account.\n')
+        print('\n8 - Reset account.')
+        print('9 - Delete account.\n')
         print('0 - Back to main menu.')
         return self.getInput()
 
@@ -132,15 +136,18 @@ class Session():
         while True:
             menuChoice = self.printAccountMenu()
             if not menuChoice:
-                return
+                return True
             elif menuChoice == 1:
                 DB.changePassword(self.username)
             elif menuChoice == 2:
                 DB.viewSecurity(self.username)
             elif menuChoice == 3:
                 DB.editUser(self.isAdmin, self.username)
+            elif menuChoice == 8:
+                DB.resetUser(self.username)
             elif menuChoice == 9:
-                DB.deleteUser(self.username)
+                if DB.deleteUser(self.username):
+                    return False
             else:
                 getpass('Unable to parse input. Press enter to re-try.')
 
