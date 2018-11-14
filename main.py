@@ -36,7 +36,7 @@ def main():
                 userSession.startSession()
         elif menuChoice == 2:
             DB.createAccount()
-            input('User created. You may now login. Press enter to continue.')
+            input('\nUser created. You may now login. Press enter to continue.')
         elif menuChoice == 3:
             DB.forgotPassword()
         elif not menuChoice:

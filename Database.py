@@ -89,6 +89,15 @@ def resetUser(Username):
     command("DELETE FROM Matches WHERE Username = ?", Username)
 
 
+def tryResetUser(Username):
+    if checkPasswordMatch(Username):
+        while True:
+            confirm = input('Finally, enter your username to confirm reset: ')
+            if confirm == Username:
+                resetUser(Username)
+                getpass('User stats have been reset. Press enter to return.')
+
+
 def deleteUser(Username):
     command("DELETE FROM Users WHERE Username = ?", Username)
 
@@ -96,11 +105,12 @@ def deleteUser(Username):
 def tryDeleteUser(Username):
     if checkPasswordMatch(Username):
         while True:
-            confirm = input('Enter your username to confirm deletion: ')
+            consoleClear()
+            confirm = input('Finally, enter your username to confirm deletion: ')
             if confirm == Username:
                 resetUser(Username)
                 deleteUser(Username)
-                getpass('User has been deleted. Returning to main menu.')
+                getpass('User has been deleted. Press enter to return.')
                 return True
 
 
@@ -459,7 +469,7 @@ AND Users.Password = ?
 def logIn():
     while True:
         consoleClear()
-        Username = input('Username: ')
+        Username = input('Username: ').lower()
         Password = getpass('Password: ')
         data = command("""
 SELECT Users.Username
@@ -480,7 +490,7 @@ AND Users.Password = ?
 def getUsername():
     while True:
         consoleClear()
-        Username = input('Username: ')
+        Username = input('Username: ').lower()
         if checkUsernameExists(Username):
             getpass('Username already in use. Press enter to try again.')
         elif len(Username) > 12 or len(Username) < 6:
