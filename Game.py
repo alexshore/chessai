@@ -157,9 +157,9 @@ def startGame(board, playerSide, ai, username):
                 win = False
             recordMatch(username, board, playerSide, win, ai)
             return
-        # if board.isStaleMate():
-        #     print('Stalemate...')
-        #     return
+        if board.isStaleMate():
+            print('Stalemate...')
+            return
         if board.currentSide == playerSide:
             printPointAdvantage(board)
             move = None

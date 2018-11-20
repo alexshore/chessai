@@ -168,14 +168,14 @@ class Board:
                     return True
         return False
 
-    # def isStaleMate(self):
-    #     if len(self.getAllMovesLegal(self.currentSide)) == 0:
-    #         for move in self.getAllMovesUnfiltered(not self.currentSide):
-    #             pieceToTake = move.pieceToCapture
-    #             if pieceToTake and pieceToTake.stringRep == 'K':
-    #                 return False
-    #         return True
-    #     return False
+    def isStaleMate(self):
+        if len(self.getAllMovesLegal(self.currentSide)) == 0:
+            for move in self.getAllMovesUnfiltered(not self.currentSide):
+                pieceToTake = move.pieceToCapture
+                if pieceToTake and pieceToTake.stringRep == 'K':
+                    return False
+            return True
+        return False
 
     def getCurrentSide(self):
         return self.currentSide
