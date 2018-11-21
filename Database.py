@@ -697,6 +697,14 @@ def getAIDepthByUser(Username):
     return 'NA'
 
 
+def getUsersStats():
+    consoleClear()
+    username = input('See stats of which user? ').lower()
+    if checkUsernameExists(username):
+        getStats(username)
+    else:
+        getpass('Sorry, that user does not exist. Press enter to return.')
+
 def getStats(Username):
     printStats([getPlayedByUser(Username),
                 getWinsByUser(Username),

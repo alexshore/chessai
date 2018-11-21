@@ -61,6 +61,7 @@ class Session():
         print('- Admin Menu. -\n')
         print('1 - Matches menu.')
         print('2 - Users menu.')
+        print('3 - View a user\'s stats.')
         print('0 - Back to main menu.')
         return self.getInput()
 
@@ -73,6 +74,8 @@ class Session():
                 self.adminMatchesMenu()
             elif adminChoice == 2:
                 self.adminUserMenu()
+            elif adminChoice == 3:
+                DB.getUsersStats()
             else:
                 getpass('Unable to parse input. Press enter to re-try.')
 

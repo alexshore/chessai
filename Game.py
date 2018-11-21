@@ -174,9 +174,6 @@ def startGame(board, playerSide, ai, username):
             elif command == 'll':
                 listMoves(board, parser, True)
                 continue
-            elif command == 'old':
-                legacy(board, parser)
-                continue
             elif command == 'u':
                 undoLastTwoMoves(board)
                 continue
