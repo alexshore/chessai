@@ -1,3 +1,6 @@
+from faker import Faker
+import numpy as np
+from random import *
 import datetime as dt
 import os
 import re
@@ -38,7 +41,7 @@ def createMatches():
 (MatchID INTEGER,
 Username TEXT,
 DateOfGame TEXT,
-Won BOOLEAN,
+Won INTEGER,
 Side REAL,
 AIDepth INTEGER,
 Moves INTEGER,
@@ -51,14 +54,14 @@ FOREIGN KEY(Username) REFERENCES Users(Username))"""
 
 def createUsers():
     sql = """CREATE TABLE IF NOT EXISTS Users
-(Username text,
-Password text,
-isAdmin boolean,
-FirstName text,
-SurName text,
-Created date,
-SecurityID integer,
-Answer text,
+(Username TEXT,
+Password TEXT,
+isAdmin INTEGER,
+FirstName TEXT,
+SurName TEXT,
+Created TEXT,
+SecurityID INTEGER,
+Answer TEXT,
 PRIMARY KEY(Username)
 FOREIGN KEY(SecurityID) REFERENCES Security(SecurityID))"""
     command(sql)
@@ -66,10 +69,29 @@ FOREIGN KEY(SecurityID) REFERENCES Security(SecurityID))"""
 
 def createSecurity():
     sql = """CREATE TABLE IF NOT EXISTS Security
-(SecurityID integer,
-Question text,
+(SecurityID INTEGER,
+Question TEXT,
 PRIMARY KEY(SecurityID))"""
     command(sql)
+
+
+def fabricate(n):
+    fake = Faker()
+    dates = [fake.date_this_year(
+        before_today=True, after_today=False) for x in range(n)]
+    dates.sort()
+    for i in range(n):
+        username = choice(DB.getAllUsernames())[0]
+        date = dates[i].strftime('%d/%m/%Y')
+        won = True if randint(0, 1) else False
+        side = choice(['WHITE', 'BLACK'])
+        depth = int(triangular(2, 4, 2))
+        moves = int(triangular(25, 55, 36))
+        piecesLeft = int(triangular(8, 22, 13))
+        endPointAdvantage = int(triangular(8, 33, 23)) if won else int(
+            triangular(-37, 8, -17))
+        addTestMatch(username, date, won, side, depth,
+                     moves, piecesLeft, endPointAdvantage)
 
 
 def addTestMatch(username, date, won, side, depth, moves, piecesLeft, endPointAdvantage):
@@ -106,7 +128,8 @@ def tryDeleteUser(Username):
     if checkPasswordMatch(Username):
         while True:
             consoleClear()
-            confirm = input('Finally, enter your username to confirm deletion: ')
+            confirm = input(
+                'Finally, enter your username to confirm deletion: ')
             if confirm == Username:
                 resetUser(Username)
                 deleteUser(Username)
@@ -147,7 +170,7 @@ def viewMatches(Field, Search=None):
             printMatches(matches[::-1])
             print(f'Currently on page {page}/{pages}.')
             newPage = input(
-                'Enter new page num or leave blank to return to menu: ')
+                'Enter new page no. or leave blank to return: ')
             if newPage:
                 correct = checkPageNo(newPage, pages)
                 if correct:
@@ -193,13 +216,10 @@ def viewMatchesByDate():
 
 
 def addInitUser():
-    date = dt.datetime.today().strftime('%d/%m/%Y')
-    temp = ['ashore', 'pw', True, 'Alex', 'Shore', date, 1, 'echo']
     command("INSERT INTO Users VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-            temp[0], temp[1], temp[2], temp[3], temp[4], temp[5], temp[6], temp[7])
-    temp = ['jfrost', 'pw', False, 'James', 'Frost', date, 1, 'honey']
-    command("INSERT INTO Users VALUES (?, ?, ?, ?, ?, ?, ?, ?)", temp[0], temp[1], temp[2], temp[3],
-            temp[4], temp[5], temp[6], temp[7])
+            'as', 'p', 1, 'Alex', 'Shore', getCurrentDate(), 1, 'echo')
+    command("INSERT INTO Users VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            'jf', 'p', 1, 'James', 'Frost', getCurrentDate(), 1, 'honey')
 
 
 def addNewUser(username, password, isAdmin, firstName, surName, date, SID, answer):
@@ -229,7 +249,7 @@ def viewUsers(Field, Search=None):
             printUsers(users)
             print(f'Currently on page {page}/{pages}.')
             newPage = input(
-                'Enter new page num or leave blank to return to menu: ')
+                'Enter new page no. or leave blank to return: ')
             if newPage:
                 correct = checkPageNo(newPage, pages)
                 if correct:
@@ -359,51 +379,75 @@ FROM Users""")
 def printUserDetails(Username):
     Username, Password, isAdmin, FirstName, SurName, Created = getUserDetails(
         Username)
-    connector = '+' + '-' * 15 + '+' + '-' * 19 + '+' + '-' * 10 + \
-        '+' + '-' * 13 + '+' + '-' * 17 + '+' + '-' * 13 + '+'
-    print(connector)
-    print(f"|{'Username':>14} |{'Password':>18} |{'isAdmin':>9} "
-          + f"|{'FirstName':>12} |{'SurName':>16} |{'Created':>12} |")
-    print(connector)
-    print(f"|{Username:>14} |{Password:>18} |{isAdmin:>9} "
-          + f"|{FirstName:>12} |{SurName:>16} |{Created:>12} |")
-    print(connector + '\n')
+    print('- Account Details -\n')
+    print(f"{'Username:':<20}" + f'{Username:>20}')
+    print(f"{'Password:':<20}" + f'{Password:>20}')
+    print(f"{'isAdmin: ':<20}" + f'{isAdmin:>20}')
+    print(f"{'Created: ':<20}" + f'{Created:>20}')
+    print('\n- Personal Details -\n')
+    print(f"{'FirstName:':<20}" + f'{FirstName:>20}')
+    print(f"{'SurName: ':<20}" + f'{SurName:>20}')
 
 
-def editUser(isAdmin, Username):
+def editUser(isAdmin, Username, currentUser):
     while True:
         consoleClear()
         printUserDetails(Username)
-        fieldChange = input(
-            '\nWhich field would you like to change (case-sensitive). Enter \'x\' to return: ')
+        print('\nInput is case sensitive.')
+        print('Leave blank to return.')
+        fieldChange = input('Field to change? ')
         consoleClear()
         newItem = None
         if fieldChange.lower() == 'x':
             return
         elif fieldChange == 'Username':
             print('Due to complications in code, this is unchangeable.')
+            getpass('Press enter to continue.')
         elif fieldChange == 'Password':
             newItem = getPassword()
         elif fieldChange == 'isAdmin':
-            newItem = getEditableAdmin() if isAdmin else getIsAdmin()
+            newItem = getIsAdmin()
         elif fieldChange == 'FirstName':
             newItem = input('Firstname: ')
         elif fieldChange == 'SurName':
             newItem = input('Surname: ')
         elif fieldChange == 'Created' and isAdmin:
             newItem = getEditableDate()
+        elif fieldChange == 'Created':
+            print('Sorry, this can only be changed by an admin.')
+            getpass('Press enter to continue.')
         else:
             retry = input('Invalid field entered. Re-enter? (yN) ')
             if retry.lower() != 'y':
                 getpass('Returning to menu. Press enter to continue.')
-                break
-        if newItem:
+                return True
+        if newItem or newItem == 0:
             try:
+                oldItem = getUserField(fieldChange, Username)
                 editUserField(fieldChange, newItem, Username)
-                print(
-                    f'{fieldChange} changed from {getUserField(fieldChange, Username)} to {newItem} for user \'{Username}\'.')
-                getpass('Press enter to continue.')
-                break
+                if fieldChange == 'isAdmin' and currentUser == Username:
+                    if newItem != oldItem:
+                        print(
+                            '\nYou had admin your status changed from '
+                            + f"{'true' if oldItem else 'false'} to "
+                            + f"{'true' if newItem else 'false'}.\n")
+                        getpass('Press enter to logout.')
+                        return False
+                    else:
+                        print(
+                            f'\nYour admin status was left unchanged.\n')
+                        getpass('Press enter to continue.')
+                        return True
+                if newItem != oldItem:
+                    print(
+                        f'\n{fieldChange} changed from {oldItem} to'
+                        + f' {newItem} for user \'{Username}\'.\n')
+                    getpass('Press enter to logout.')
+                    return False
+                else:
+                    print(
+                        f'\n{fieldChange} was left '
+                        + 'unchanged for user \'{Username}\'.\n')
             except:
                 getpass('Something went wrong. Press enter to try again.')
 
@@ -535,25 +579,19 @@ def getPassword():
             getpass('Passwords don\'t match. Press enter to try again.\n')
 
 
-def getEditableAdmin():
-    consoleClear()
-    adminAttempt = input('Set this account as admin? (yN) ')
-    return True if adminAttempt.lower() == 'y' else False
-
-
 def getIsAdmin():
     consoleClear()
     adminAttempt = input('Set this account as admin? (yN) ')
     if adminAttempt.lower() != 'y':
-        return False
+        return 0
     while True:
         adminPass = getpass('\nPermission code: ')
-        if adminPass == 'yo dawg':
-            getpass('Correct code, setting as admin. Press enter to continue.')
-            return True
+        if adminPass == 'lifegoeson':
+            return 1
         tryAgain = input('\nIncorrect code. Try again? (yN) ')
         if tryAgain.lower() != 'y':
-            return False
+            return 0
+        consoleClear()
 
 
 def getEditableDate():
@@ -586,14 +624,14 @@ def getSecurity():
             getpass('\nInvalid choice. Press enter to try again.')
         else:
             break
-    Answer = input('Enter answer: ')
+    Answer = input('Enter answer: ').lower()
     return SID, Answer
 
 
 def getPersonalDetails():
     consoleClear()
-    Firstname = input('Firstname: ')
-    Surname = input('Surname: ')
+    Firstname = input('Set firstname as: ')
+    Surname = input('Set surname as: ')
     return Firstname, Surname
 
 
@@ -618,7 +656,7 @@ def forgotPassword():
         if checkUsernameExists(Username):
             print(getQuestion(Username))
             while True:
-                Answer = getpass('Answer: ')
+                Answer = getpass('Answer: ').lower()
                 if Answer == getAnswer(Username):
                     getpass(
                         'You may now enter a new password. Press enter to continue.')
@@ -705,6 +743,7 @@ def getUsersStats():
     else:
         getpass('Sorry, that user does not exist. Press enter to return.')
 
+
 def getStats(Username):
     printStats([getPlayedByUser(Username),
                 getWinsByUser(Username),
@@ -714,15 +753,15 @@ def getStats(Username):
                 getMovesByUser(Username),
                 getLastGameDate(Username),
                 getAIDepthByUser(Username)],
-                Username)
+               Username)
 
 
 def printStats(stats, username):
     consoleClear()
-    print(f'- Base stats ({username}). -\n')
+    print(f'- Base stats ({username}) -\n')
     print(f"{'Total matches played: ':<30}" + f'{stats[0]:>10}')
     print(f"{'Total match wins: ':<30}" + f'{stats[1]:>10}')
-    print(f"{'Percentage win rate: ':<30}" + f'{stats[2]:>10}')
+    print(f"{'Percentage win rate: ':<30}" + f'{stats[2]:>9}%')
     print(f"{'Common AI depth (recent): ':<30}" + f'{stats[7]:>10}')
     print(f"{'Last played game: ':<30}" + f'{stats[6]:>10}\n')
     print('- More stats (most / least / average). -\n')
@@ -736,12 +775,20 @@ def printStats(stats, username):
 
 
 def bootDB():
-    dump()
+    dumpUsers()
+    dumpMatches()
+    createUsers()
+    createMatches()
+    fabricate(400)
     addInitUser()
 
 
-def dump():
-    command("DELETE FROM Users")
+def dumpUsers():
+    command("DROP TABLE IF EXISTS Users")
+
+
+def dumpMatches():
+    command("DROP TABLE IF EXISTS Matches")
 
 
 def menu():

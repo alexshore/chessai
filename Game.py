@@ -59,8 +59,8 @@ def listMoves(board, parser, pawns):
     movesWithPiece = [[]]
     pieceRep = ''
     for move in moves:
-        columnHead = move.piece.stringRep + \
-            ' - {}'.format(move.positionToHumanCoord(move.oldPos))
+        columnHead = f"{move.piece.stringRep} - " + \
+                     f"{move.positionToHumanCoord(move.oldPos)}"
         if (pawns or move.piece.stringRep != 'p') and \
                 [columnHead, move.piece] not in movesWithPiece[0]:
             movesWithPiece.append([])
@@ -80,7 +80,7 @@ def listMoves(board, parser, pawns):
     columnHeader = "|"
     connector = '+'
     for i in range(len(movesWithPiece[0])):
-        columnHeader += '{:>7} |'.format(movesWithPiece[0][i][0])
+        columnHeader += f'{movesWithPiece[0][i][0]:>7} |'
         connector += '-' * 8 + '+'
     print(connector + '\n' + columnHeader + '\n' + connector)
     rows = []
@@ -92,7 +92,7 @@ def listMoves(board, parser, pawns):
     for i in range(len(rows)):
         row = "|"
         for each in range(len(rows[i])):
-            row += "{:>7} |".format(rows[i][each])
+            row += f"{rows[i][each]:>7} |"
         print(row)
     print(connector + '\n')
     getpass('Press enter to continue.')
@@ -151,10 +151,10 @@ def startGame(board, playerSide, ai, username):
         if board.isCheckMate():
             if board.currentSide == playerSide:
                 print('Checkmate, you lost.')
-                win = True
+                win = False
             else:
                 print('Checkmate! You won!')
-                win = False
+                win = True
             recordMatch(username, board, playerSide, win, ai)
             return
         if board.isStaleMate():
@@ -189,12 +189,12 @@ def startGame(board, playerSide, ai, username):
                 print('Couldn\'t parse input, enter a valid command or move.')
         elif board.currentSide == ai.side:
             print('AI thinking...')
-            move = ai.getBestMove(False)
+            move = ai.getBestMove()
             move.notation = move.getNotation()
             makeMove(move, board)
             getpass('\nPress enter to continue.')
             if board.currentSide == ai.side:
-                board.currentSide == playerSide
+                board.currentSide = playerSide
 
 
 def main(username):

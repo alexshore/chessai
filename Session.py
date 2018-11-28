@@ -6,7 +6,7 @@ from termcolor import colored as c
 from getpass import getpass
 
 
-class Session():
+class Session:
 
     def __init__(self, isAdmin, firstName, username):
         self.isAdmin = isAdmin
@@ -43,7 +43,8 @@ class Session():
             if not choice:
                 return
             elif choice == 9 and self.isAdmin:
-                self.adminMenu()
+                if not self.adminMenu():
+                    return
             elif choice == 1:
                 Game.main(self.username)
             elif choice == 2:
@@ -61,7 +62,7 @@ class Session():
         print('- Admin Menu. -\n')
         print('1 - Matches menu.')
         print('2 - Users menu.')
-        print('3 - View a user\'s stats.')
+        print('3 - View stats.')
         print('0 - Back to main menu.')
         return self.getInput()
 
@@ -69,11 +70,12 @@ class Session():
         while True:
             adminChoice = self.printAdminMenu()
             if not adminChoice:
-                return
+                return True
             elif adminChoice == 1:
                 self.adminMatchesMenu()
             elif adminChoice == 2:
-                self.adminUserMenu()
+                if not self.adminUserMenu():
+                    return False
             elif adminChoice == 3:
                 DB.getUsersStats()
             else:
@@ -139,7 +141,8 @@ class Session():
             elif menuChoice == 2:
                 DB.viewSecurity(self.username)
             elif menuChoice == 3:
-                DB.editUser(self.isAdmin, self.username)
+                if not DB.editUser(self.isAdmin, self.username, self.username):
+                    return False
             elif menuChoice == 8:
                 DB.tryResetUser(self.username)
             elif menuChoice == 9:
@@ -172,14 +175,14 @@ class Session():
             elif menuChoice == 4:
                 while True:
                     self.consoleClear()
-                    DB.getAllUsers()
                     Username = input(
-                        '\nWhich user would you like to edit? (Username) ')
+                        'Which user would you like to edit? (Username) ')
                     if DB.checkUsernameExists(Username):
-                        DB.editUser(True, Username)
-                        break
+                        if not DB.editUser(True, Username, self.username):
+                            return False
                     else:
-                        getpass('Invalid username. Press enter to try again.')
+                        getpass('Invalid username. Press enter to continue.')
+                        break
             elif menuChoice == 3:
                 self.userSearchMenu()
             else:
