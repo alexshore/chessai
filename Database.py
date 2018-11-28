@@ -201,7 +201,7 @@ def viewAllMatches():
 def viewMatchesByUser():
     while True:
         consoleClear()
-        Search = input('Search for matches by username: ')
+        Search = input('Search for matches by username: ').lower()
         if checkUsernameExists(Search):
             break
         else:
@@ -279,19 +279,19 @@ def viewAllUsers():
 
 def searchByUsername():
     consoleClear()
-    Search = input('Enter username to search for: ')
+    Search = input('Enter username to search for: ').lower()
     viewUsers('Username', Search)
 
 
 def searchByFirstname():
     consoleClear()
-    Search = input('Enter firstname to search for: ')
+    Search = input('Enter firstname to search for: ').lower()
     viewUsers('FirstName', Search)
 
 
 def searchByLastname():
     consoleClear()
-    Search = input('Enter lastname to search for: ')
+    Search = input('Enter lastname to search for: ').lower()
     viewUsers('SurName', Search)
 
 
@@ -561,8 +561,8 @@ def checkPasswordValidity(Password):
 
 
 def getPassword():
-    consoleClear()
     while True:
+        consoleClear()
         print('Password must be between 8-16 characters long.')
         print('Password must contain lowercase and uppercase.')
         print('Password must contain at least one number.')
@@ -630,8 +630,8 @@ def getSecurity():
 
 def getPersonalDetails():
     consoleClear()
-    Firstname = input('Set firstname as: ')
-    Surname = input('Set surname as: ')
+    Firstname = input('Set firstname as: ').lower()
+    Surname = input('Set surname as: ').lower()
     return Firstname, Surname
 
 
