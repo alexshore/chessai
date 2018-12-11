@@ -93,6 +93,7 @@ class King(Piece):
                                     self.position - C(1, 0))
                     move.kingSideCastle = True
                     move.rookMove = rookMove
+                    move.castle = True
                     yield move
                 if not queenSideCastleBlocked and \
                         not queenSideCastleCheck and \
@@ -104,4 +105,5 @@ class King(Piece):
                                     self.position + C(1, 0))
                     move.queenSideCastle = True
                     move.rookMove = rookMove
+                    move.castle = True
                     yield move

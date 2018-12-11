@@ -8,11 +8,12 @@ class InputParser:
         self.side = side
 
     def parse(self, humanInput):
+        newInput = None
         if re.compile('[a-z][1-8]x*[a-z][1-8]=[qbnr]').match(humanInput):
             newInput = humanInput[:-1] + humanInput[-1].upper()
         elif re.compile('[a-z][1-8]x*[a-z][1-8]').match(humanInput):
             newInput = humanInput
-        else:
+        elif re.compile('0[/-0/]*').match(humanInput):
             newInput = humanInput
         for move in self.getLegalMovesWithNotation(self.side):
             if move.notation == newInput:

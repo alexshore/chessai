@@ -5,6 +5,7 @@ import datetime as dt
 import os
 import re
 import sqlite3
+from termcolor import colored
 from getpass import *
 from statistics import mean, mode
 

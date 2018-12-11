@@ -15,6 +15,7 @@ from Pawn import Pawn
 from Piece import Piece
 from Queen import Queen
 from Rook import Rook
+from termcolor import colored as colour
 
 WHITE = True
 BLACK = False
@@ -59,8 +60,8 @@ def listMoves(board, parser, pawns):
     movesWithPiece = [[]]
     pieceRep = ''
     for move in moves:
-        columnHead = f"{move.piece.stringRep} - " + \
-                     f"{move.positionToHumanCoord(move.oldPos)}"
+        columnHead = f"{colour(move.piece.stringRep, 'green')} at " + \
+                     f"{colour(move.positionToHumanCoord(move.oldPos), 'cyan')}"
         if (pawns or move.piece.stringRep != 'p') and \
                 [columnHead, move.piece] not in movesWithPiece[0]:
             movesWithPiece.append([])
@@ -80,8 +81,8 @@ def listMoves(board, parser, pawns):
     columnHeader = "|"
     connector = '+'
     for i in range(len(movesWithPiece[0])):
-        columnHeader += f'{movesWithPiece[0][i][0]:>7} |'
-        connector += '-' * 8 + '+'
+        columnHeader += f" {movesWithPiece[0][i][0]:>8} |"
+        connector += '-' * 9 + '+'
     print(connector + '\n' + columnHeader + '\n' + connector)
     rows = []
     for i in range(len(movesWithPiece[1])):
@@ -92,7 +93,7 @@ def listMoves(board, parser, pawns):
     for i in range(len(rows)):
         row = "|"
         for each in range(len(rows[i])):
-            row += f"{rows[i][each]:>7} |"
+            row += f"{rows[i][each]:>8} |"
         print(row)
     print(connector + '\n')
     getpass('Press enter to continue.')

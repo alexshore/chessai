@@ -1,8 +1,5 @@
-import copy
 import random
-from multiprocessing import Pool
 
-from InputParser import InputParser
 from MoveNode import MoveNode
 
 WHITE = True
@@ -19,49 +16,6 @@ class AI:
         self.board = board
         self.side = side
         self.depth = depth
-        self.parser = InputParser(self.board, self.side)
-
-    def getFirstMove(self, side):
-        move = list(self.getAllMovesLegal(side))[0]
-        return move
-
-    # def getAllMovesLegalConcurrent(self, side):
-    #     p = Pool(8)
-    #     unfilteredMovesWithBoard = \
-    #         [(move, copy.deepcopy(self.board))
-    #          for move in self.board.getAllMovesUnfiltered(side)]
-    #     legalMoves = p.starmap(self.returnMoveIfLegal,
-    #                            unfilteredMovesWithBoard)
-    #     p.close()
-    #     p.join()
-    #     return list(filter(None, legalMoves))
-
-    # def minChildrenOfNode(self, node):
-    #     lowestNodes = []
-    #     for child in node.children:
-    #         if not lowestNodes:
-    #             lowestNodes.append(child)
-    #         elif child < lowestNodes[0]:
-    #             lowestNodes = [child]
-    #         elif child == lowestNodes[0]:
-    #             lowestNodes.append(child)
-    #     return lowestNodes
-
-    # def maxChildrenOfNode(self, node):
-    #     highestNodes = []
-    #     for child in node.children:
-    #         if not highestNodes:
-    #             highestNodes.append(child)
-    #         elif child < highestNodes[0]:
-    #             highestNodes = [child]
-    #         elif child == highestNodes[0]:
-    #             highestNodes.append(child)
-    #     return highestNodes
-
-    def getRandomMove(self):
-        legalMoves = list(self.board.getAllMovesLegal(self.side))
-        randomMove = random.choice(legalMoves)
-        return randomMove
 
     def generateMoveTree(self):
         moveTree = []
@@ -130,13 +84,3 @@ class AI:
             elif moveNode == bestMoveNodes[0]:
                 bestMoveNodes.append(moveNode)
         return [node.move for node in bestMoveNodes]
-
-    # def isValidMove(self, move, side):
-    #     for legalMove in self.board.getAllMovesLegal(side):
-    #         if move == legalMove:
-    #             return True
-    #     return False
-
-    # def makeRandomMove(self):
-    #     moveToMake = self.getRandomMove()
-    #     self.board.makeMove(moveToMake)

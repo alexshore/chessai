@@ -45,14 +45,6 @@ class MoveNode:
             return True
         return self.pointAdvantage == other.pointAdvantage
 
-    def getHighestNode(self):
-        highestNode = self
-        while True:
-            if highestNode.parent is not None:
-                highestNode = highestNode.parent
-            else:
-                return highestNode
-
     def getDepth(self):
         depth = 1
         highestNode = self

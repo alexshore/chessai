@@ -6,6 +6,7 @@ class Move:
         self.staleMate = False
         self.kingSideCastle = False
         self.queenSideCastle = False
+        self.castle = False
         self.promotion = False
 
         self.piece = piece

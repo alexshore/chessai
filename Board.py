@@ -21,10 +21,9 @@ class Board:
         self.points = 0
         self.currentSide = WHITE
         self.movesMade = 0
-        self.checkmate = False
 
         if not pawnTest and not rookTest and not queenTest and not bishopTest \
-         and not knightTest and not castle and not takeTest and not promotion:
+                and not knightTest and not castle and not takeTest and not promotion:
             self.pieces.extend([Rook(self, BLACK, C(0, 7)),
                                 Knight(self, BLACK, C(1, 7)),
                                 Bishop(self, BLACK, C(2, 7)),
@@ -35,7 +34,6 @@ class Board:
                                 Rook(self, BLACK, C(7, 7))])
             for x in range(8):
                 self.pieces.append(Pawn(self, BLACK, C(x, 6)))
-            for x in range(8):
                 self.pieces.append(Pawn(self, WHITE, C(x, 1)))
             self.pieces.extend([Rook(self, WHITE, C(0, 0)),
                                 Knight(self, WHITE, C(1, 0)),
@@ -118,7 +116,7 @@ class Board:
     def undoLastMove(self):
         lastMove, pieceTaken = self.history.pop()
 
-        if lastMove.queenSideCastle or lastMove.kingSideCastle:
+        if lastMove.castle:
             king = lastMove.piece
             rook = lastMove.specialMovePiece
 
@@ -177,9 +175,6 @@ class Board:
             return True
         return False
 
-    def getCurrentSide(self):
-        return self.currentSide
-
     def makeStringRep(self, pieces):
         stringRep = ''
         for y in range(7, -1, -1):
@@ -203,41 +198,18 @@ class Board:
 
     def wrapStringRep(self, stringRep):
         sRep = '\n'.join(
-            ['   a b c d e f g h   ', ' ' * 21]
-            + ['%d  %s  %d' % (8 - r, s.strip(), 8 - r)
-             for r, s in enumerate(stringRep.split('\n'))] +
+            ['   a b c d e f g h   ', ' ' * 21] +
+            ['%d  %s  %d' % (8 - r, s.strip(), 8 - r)
+               for r, s in enumerate(stringRep.split('\n'))] +
             [' ' * 21, '   a b c d e f g h   ']
         ).rstrip()
         return sRep
-
-    def rankOfPiece(self, piece):
-        return str(piece.position[1] + 1)
-
-    def fileOfPiece(self, piece):
-        transTable = str.maketrans('01234567', 'abcdefgh')
-        return str(piece.position[0]).translate(transTable)
-
-    def humanCoordToPosition(self, coord):
-        transTable = str.maketrans('abcdefgh', '12345678')
-        coord = coord.translate(transTable)
-        coord = [int(c) - 1 for c in coord]
-        pos = C(coord[0], coord[1])
-        return pos
 
     def isValidPos(self, pos):
         if 0 <= pos[0] <= 7 and 0 <= pos[1] <= 7:
             return True
         else:
             return False
-
-    def getSideOfMove(self, move):
-        return move.piece.side
-
-    def getPositionOfPiece(self, piece):
-        for y in range(8):
-            for x in range(8):
-                if self.boardArray[y][x] is piece:
-                    return C(x, 7 - y)
 
     def pieceAtPosition(self, pos, debug=False):
         for piece in self.pieces:
@@ -250,13 +222,9 @@ class Board:
     def addPieceToPosition(self, piece, pos):
         piece.position = pos
 
-    def clearPosition(self, pos):
-        x, y = self.coordToLocationInArray(pos)
-        self.boardArray[x][y] = None
-
     def makeMove(self, move):
         self.addMoveToHistory(move)
-        if move.kingSideCastle or move.queenSideCastle:
+        if move.castle:
             kingToMove = move.piece
             rookToMove = move.specialMovePiece
             self.movePieceToPosition(kingToMove, move.newPos)
@@ -297,7 +265,6 @@ class Board:
             self.history.append([move, pieceTaken])
         else:
             self.history.append([move, None])
-        return
 
     def getPointValueOfSide(self, side):
         points = 0
