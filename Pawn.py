@@ -35,6 +35,7 @@ class Pawn(Piece):
                     for piece in piecesForPromotion:
                         move = Move(self, advanceOnePos)
                         move.promotion = True
+                        piece.movesMade = self.movesMade
                         move.specialMovePiece = piece
                         yield move
                 else:
