@@ -16,6 +16,7 @@ BLACK = False
 class Board:
     def __init__(self, rookTest=False, queenTest=False, bishopTest=False, knightTest=False,
                  pawnTest=False, takeTest=False, castle=False, promotion=False):
+
         self.pieces = []
         self.history = []
         self.points = 0

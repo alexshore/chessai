@@ -1,5 +1,5 @@
 from Coordinate import Coordinate as C
-from Move import Move
+from OddMove import Move
 
 WHITE = True
 BLACK = False
@@ -79,7 +79,7 @@ class Helicopter(Piece):
 
     def getPossibleMoves(self):
         board = self.board
-        pos = self.positionToHumanCoord
+        pos = self.position
         movements = []
         for x in range(-3, 4):
             for y in range(-3, 4):
@@ -96,13 +96,13 @@ class Helicopter(Piece):
                     yield Move(self, newPos, pieceToCapture=pieceAtNewPos)
 
 
-class AngryFeminist(Piece):
+class Feminist(Piece):
 
     stringRep = 'F'
     value = 50
 
     def __init__(self, board, side, position,  movesMade=0):
-        super(AngryFeminist, self).__init__(board, side, position)
+        super(Feminist, self).__init__(board, side, position)
         self.movesMade = movesMade
 
     def getPossibleMoves(self):
@@ -139,24 +139,55 @@ class AngryFeminist(Piece):
         for movement in movements:
             newPos = pos + movement
             if board.isValidPos(newPos):
-                pieceAtNewPos = Board.pieceAtPosition(newPos)
+                pieceAtNewPos = board.pieceAtPosition(newPos)
                 if pieceAtNewPos and pieceAtNewPos.stringRep == 'H':
                     return movement
 
-class Mech(Piece):
-    pass
-
-class PornAddictedTeen(Piece):
+class PornAddict(Piece):
 
     stringRep = 'P'
-    value = 1
+    value = 3
 
     def __init__(self, board, side, position, movesMade=0):
-        super(PornAddictedTeen, self).__init__(board, side, position)
+        super(PornAddict, self).__init__(board, side, position)
         self.movesMade = movesMade
 
     def getPossibleMoves(self):
-        pass
+        board = self.board
+        pos = self.position
+        movements = [C(2, 1), C(2, -1), C(-2, 1), C(-2, -1),
+                     C(1, 2), C(1, -2), C(-1, 2), C(-1, -2)]
+        for movement in movements:
+            newPos = pos + movement
+            if board.isValidPos(newPos):
+                pieceAtNewPos = board.pieceAtPosition(newPos)
+                if pieceAtNewPos is None:
+                    yield Move(self, newPos)
+                elif pieceAtNewPos.side != self.side:
+                    yield Move(self, newPos, pieceToCapture=pieceAtNewPos)
+
+class AbusiveFather(Piece):
+
+    stringRep = 'A'
+    value = 3
+
+    def __init__(self, board, side, position, movesMade=0):
+        super(AbusiveFather, self).__init__(board, side, position)
+        self.movesMade = movesMade
+
+    def getPossibleMoves(self):
+        board = self.board
+        pos = self.position
+        movements = [C(2, 1), C(2, -1), C(-2, 1), C(-2, -1),
+                     C(1, 2), C(1, -2), C(-1, 2), C(-1, -2)]
+        for movement in movements:
+            newPos = pos + movement
+            if board.isValidPos(newPos):
+                pieceAtNewPos = board.pieceAtPosition(newPos)
+                if pieceAtNewPos is None:
+                    yield Move(self, newPos)
+                elif pieceAtNewPos.side != self.side:
+                    yield Move(self, newPos, pieceToCapture=pieceAtNewPos)
 
 class SuicideBomber(Piece):
 
@@ -170,9 +201,10 @@ class SuicideBomber(Piece):
     def getPossibleMoves(self):
         board = self.board
         pos = self.position
-        movements = [C(0, 1), C(1, 0), C(-1, 0)] \
-                     if self.side else movements = \
-                    [C(0, -1), C(1, 0), C(-1, 0)]
+        if self.side:
+            movements = [C(0, 1), C(1, 0), C(-1, 0)]
+        else:
+            movements = [C(0, -1), C(1, 0), C(-1, 0)]
         for movement in movements:
             newPos = pos + movement
             if board.isValidPos(newPos) and board.notInFeministRange(self.side, newPos):

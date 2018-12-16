@@ -1,6 +1,6 @@
 class Move:
 
-    def __init__(self, piece, newPos, pieceToCapture=None):
+    def __init__(self, piece, newPos, pieceToCapture=None, cripple=False):
         self.check = False
         self.checkMate = False
         self.staleMate = False
@@ -8,7 +8,7 @@ class Move:
         self.queenSideCastle = False
         self.castle = False
         self.promotion = False
-        self.cripple = False
+        self.cripple = cripple
         self.piece = piece
         self.oldPos = piece.position
         self.newPos = newPos
