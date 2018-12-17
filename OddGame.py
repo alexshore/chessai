@@ -3,19 +3,12 @@ import random
 from getpass import *
 
 import Database as DB
-from AI import AI
-from Bishop import Bishop
-from Board import Board
+from OddBoard import Board
 from Coordinate import Coordinate as C
-from InputParser import InputParser
-from King import King
-from Knight import Knight
-from Move import Move
-from Pawn import Pawn
-from Piece import Piece
-from Queen import Queen
-from Rook import Rook
-from OddPieces import
+from OddParser import InputParser
+from OddMove import Move
+from OddPieces import (AbusiveFather, Feminist, Helicopter, PornAddict,
+                       SuicideBomber, Piece)
 from termcolor import colored as colour
 
 WHITE = True
@@ -27,12 +20,6 @@ def consoleClear():
     os.system('cls')
 
 
-def recordMatch(username, board, side, won, ai):
-    DB.addMatch(username, won, 'WHITE' if side else 'BLACK',
-                ai.depth, board.movesMade, len(board.pieces),
-                board.getPointAdvantageOfSide(side))
-
-
 def askForPlayerSide():
     playerInput = input(
         'What side would you like to play as [wB]? ').lower()
@@ -42,17 +29,6 @@ def askForPlayerSide():
     else:
         print('You will play as black.')
         return BLACK
-
-
-def askForAIDepth():
-    depthInput = 2
-    try:
-        depthInput = int(input('How deep should the AI look for moves?\n'
-                               + '-WARNING- values above 3 will be slow.\n'
-                               + 'Leave blank for default: '))
-    except:
-        print('Invalid input, defaulting to 2.')
-    return depthInput
 
 
 def listMoves(board, parser, pawns):
@@ -117,12 +93,6 @@ def printPointAdvantage(board):
           + str(board.getPointAdvantageOfSide(board.currentSide)))
 
 
-def undoLastTwoMoves(board):
-    if len(board.history) >= 2:
-        board.undoLastMove()
-        board.undoLastMove()
-
-
 def makeMove(move, board):
     print()
     print("Making move : " + move.notation)
@@ -132,10 +102,8 @@ def makeMove(move, board):
 def printCommandOptions():
     consoleClear()
     print('- Options. -\n')
-    undoOption = 'u - undo last move'
     printMovesOption = 'l - show all moves w/out pawns'
     printAllMovesOption = 'll - show all moves'
-    randomMoveOption = 'r - make a random move'
     quitOption = 'quit - resign'
     moveOption = 'a3a5, c3xa5, 0-0, b7b8=R - make the move'
     options = [undoOption, printMovesOption, printAllMovesOption,
@@ -144,28 +112,24 @@ def printCommandOptions():
     getpass('Press enter to continue.')
 
 
-def startGame(board, playerSide, ai, username):
-    parser = InputParser(board, playerSide)
+def startGame(board):
+    parser = InputParser(board, True)
     while True:
         consoleClear()
         print(board)
         print()
         if board.isCheckMate():
-            if board.currentSide == playerSide:
-                print('Checkmate, you lost.')
-                win = False
+            if board.currentSide:
+                print('Checkmate,  lost.')
             else:
                 print('Checkmate! You won!')
-                win = True
-            recordMatch(username, board, playerSide, win, ai)
-            return
         if board.isStaleMate():
             print('Stalemate...')
             return
-        if board.currentSide == playerSide:
+        if board.currentSide:
             printPointAdvantage(board)
             move = None
-            command = input('It\'s your move. '
+            command = input('It\'s your move, white boy. '
                             'Type \'?\' for options: ').lower()
             if command == '?':
                 printCommandOptions()
@@ -176,11 +140,6 @@ def startGame(board, playerSide, ai, username):
             elif command == 'll':
                 listMoves(board, parser, True)
                 continue
-            elif command == 'u':
-                undoLastTwoMoves(board)
-                continue
-            elif command == 'r':
-                move = getRandomMove(board, parser)
             elif command == 'quit':
                 return
             else:
@@ -188,26 +147,36 @@ def startGame(board, playerSide, ai, username):
             if move:
                 makeMove(move, board)
             else:
-                print('Couldn\'t parse input, enter a valid command or move.')
-        elif board.currentSide == ai.side:
-            print('AI thinking...')
-            move = ai.getBestMove()
-            move.notation = move.getNotation()
-            makeMove(move, board)
-            getpass('\nPress enter to continue.')
-            if board.currentSide == ai.side:
-                board.currentSide = playerSide
+                getpass('Invalid input. Try again.')
+        elif not board.currentSide:
+            printPointAdvantage(board)
+            move = None
+            command = input('It\'s your move, black man. '
+                            'Type \'?\' for options: ').lower()
+            if command == '?':
+                printCommandOptions()
+                continue
+            elif command == 'l':
+                listMoves(board, parser, False)
+                continue
+            elif command == 'll':
+                listMoves(board, parser, True)
+                continue
+            elif command == 'quit':
+                return
+            else:
+                move = parser.parse(command)
+            if move:
+                makeMove(move, board)
+            else:
+                getpass('Invalid input. Try again.')
 
 
-def main(username):
+def main():
     consoleClear()
     board = Board()
-    playerSide = askForPlayerSide()
-    print()
-    aiDepth = askForAIDepth()
-    opponentAI = AI(board, not playerSide, aiDepth)
-    startGame(board, playerSide, opponentAI, username)
+    startGame(board)
 
 
 if __name__ == '__main__':
-    main('ashore')
+    main()
