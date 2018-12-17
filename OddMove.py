@@ -9,6 +9,7 @@ class Move:
         self.castle = False
         self.promotion = False
         self.cripple = False
+        self.whip = False
         self.piece = piece
         self.oldPos = piece.position
         self.newPos = newPos

@@ -220,9 +220,20 @@ class Board:
         movements = [C(0, 1), C(-1, -1), C(1, 0), C(-1, 0),
                      C(1, 1), C(1, -1), C(-1, 1), C(0, -1)]
         for movement in movements:
-            if type(self.pieceAtPosition(pos + movement)).__name__ == 'AngryFeminist' and self.pieceAtPosition.side != side:
+            pieceAtPos = self.pieceAtPosition(pos + movement)
+            if pieceAtPos.stringRep == 'F' and pieceAtPos.side != side:
                 return False
         return True
+
+    def scanForTikTok(self, side, pos):
+        movements = [C(1, 0), C(-1, 0)]
+        i = 0
+        for movement in movements:
+            pieceAtPos = self.pieceAtPosition(pos + movement)
+            if pieceAtPos.stringRep == 't' and pieceAtPos.side == side:
+                i += 1
+        return i + 1
+
 
     def movePieceToPosition(self, piece, pos):
         piece.position = pos
@@ -232,27 +243,7 @@ class Board:
 
     def makeMove(self, move):
         self.addMoveToHistory(move)
-        if move.castle:
-            kingToMove = move.piece
-            rookToMove = move.specialMovePiece
-            self.movePieceToPosition(kingToMove, move.newPos)
-            self.movePieceToPosition(rookToMove, move.rookMove.newPos)
-            kingToMove.movesMade += 1
-            rookToMove.movesMade += 1
-
-        elif move.promotion:
-            movesMade = move.piece.movesMade
-            self.pieces.remove(move.piece)
-            if move.pieceToCapture:
-                self.pieces.remove(move.pieceToCapture)
-            self.pieces.append(move.specialMovePiece)
-
-            if move.piece.side == WHITE:
-                self.points += move.specialMovePiece.value - 1
-            if move.piece.side == BLACK:
-                self.points -= move.specialMovePiece.value - 1
-
-        elif move.cripple:
+        if move.cripple:
             pieceToMove = move.piece
             pieceToTake = move.pieceToCapture
             newPos = move.newPos
@@ -260,13 +251,22 @@ class Board:
                 pieceAtCripplePos = self.pieceAtPosition(newPos + cripplePos)
                 if pieceAtCripplePos and pieceAtCripplePos.side != self.side:
                     self.pieces.remove(pieceAtCripplePos)
-                    self.pieces.append(PornAddictedTeen(self, self.side, newPos + cripplePos))
+                    self.pieces.append(TikTokFan(self, self.side, newPos + cripplePos))
+            for piece in self.pieces:
+                if piece.stringRep == 'A':
+                    piece.waitTime -= 1
 
+        elif move.whip:
+            pieceToMove = move.piece
+            pieceToTake = move.pieceToCapture
+            self.pieces.remove(pieceToTake)
+            pieceToMove.waitTime += 1
+            pieceToMove.movesMade += 1
+            self.movePieceToPosition(pieceToMove, move.newPos)
 
         else:
             pieceToMove = move.piece
             pieceToTake = move.pieceToCapture
-
             if pieceToTake:
                 if pieceToTake.side == WHITE:
                     self.points -= pieceToTake.value
@@ -276,6 +276,9 @@ class Board:
 
             self.movePieceToPosition(pieceToMove, move.newPos)
             pieceToMove.movesMade += 1
+            for piece in self.pieces:
+                if piece.stringRep == 'A':
+                    piece.waitTime -= 1
         self.movesMade += 1
         self.currentSide = not self.currentSide
 
