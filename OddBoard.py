@@ -1,12 +1,7 @@
-from Bishop import Bishop
 from Coordinate import Coordinate as C
-from King import King
-from Knight import Knight
-from Move import Move
-from Pawn import Pawn
-from Piece import Piece
-from Queen import Queen
-from Rook import Rook
+from OddMove import Move
+from OddPieces import (AbusiveFather, AngryFeminist, Helicopter, NeckBeard,
+                       Piece, PornAddict, SuicideBomber, TikTokFan)
 from termcolor import colored
 
 WHITE = True
@@ -14,135 +9,62 @@ BLACK = False
 
 
 class Board:
-    def __init__(self, rookTest=False, queenTest=False, bishopTest=False, knightTest=False,
-                 pawnTest=False, takeTest=False, castle=False, promotion=False):
+    def __init__(self, bomberTest=False, helicopterTest=False,
+                 feministTest=False, tikTokTest=False, addictTest=False,
+                 beardTest=False, fatherTest=False):
         self.pieces = []
         self.history = []
         self.points = 0
         self.currentSide = WHITE
         self.movesMade = 0
 
-        if not pawnTest and not rookTest and not queenTest and not bishopTest \
-                and not knightTest and not castle and not takeTest and not promotion:
-            self.pieces.extend([Rook(self, BLACK, C(0, 7)),
-                                Knight(self, BLACK, C(1, 7)),
-                                Bishop(self, BLACK, C(2, 7)),
-                                King(self, BLACK, C(3, 7)),
-                                Queen(self, BLACK, C(4, 7)),
-                                Bishop(self, BLACK, C(5, 7)),
-                                Knight(self, BLACK, C(6, 7)),
-                                Rook(self, BLACK, C(7, 7))])
+        if not bomberTest and not helicopterTest and not feministTest and  \
+           not tikTokTest and not addictTest and not beardTest and not fatherTest:
+            self.pieces.extend([SuicideBomber(self, BLACK, C(0, 7)),
+                                AbusiveFather(self, BLACK, C(2, 7)),
+                                AngryFeminist(self, BLACK, C(3, 7)),
+                                Helicopter(self, BLACK, C(4, 7)),
+                                PornAddict(self, BLACK, C(5, 7)),
+                                SuicideBomber(self, BLACK, C(7, 7))])
             for x in range(8):
-                self.pieces.append(Pawn(self, BLACK, C(x, 6)))
-                self.pieces.append(Pawn(self, WHITE, C(x, 1)))
-            self.pieces.extend([Rook(self, WHITE, C(0, 0)),
-                                Knight(self, WHITE, C(1, 0)),
-                                Bishop(self, WHITE, C(2, 0)),
-                                King(self, WHITE, C(3, 0)),
-                                Queen(self, WHITE, C(4, 0)),
-                                Bishop(self, WHITE, C(5, 0)),
-                                Knight(self, WHITE, C(6, 0)),
-                                Rook(self, WHITE, C(7, 0))])
-
-        elif pawnTest:
-            pawnToMove = Pawn(self, WHITE, C(2, 1))
-            pawnToMove.movesMade = 0
-            pawnToPromote = Pawn(self, WHITE, C(2, 6))
-            pawnToPromote.movesMade = 4
-            pieceToTake = Rook(self, BLACK, C(1, 7))
-            whiteKing = King(self, WHITE, C(4, 0))
-            blackKing = King(self, BLACK, C(4, 7))
-            self.pieces.extend(
-                [pawnToMove, pawnToPromote, whiteKing, pieceToTake, blackKing])
-
-        elif rookTest:
-            whiteRook = Rook(self, WHITE, C(4, 4))
-            whiteKing = King(self, WHITE, C(3, 0))
-            blackKing = King(self, BLACK, C(3, 7))
-            self.pieces.extend([whiteRook, whiteKing, blackKing])
-
-        elif queenTest:
-            whiteQueen = Queen(self, WHITE, C(2, 2))
-            whiteKing = King(self, WHITE, C(4, 0))
-            blackQueen = Queen(self, BLACK, C(3, 6))
-            blackKing = King(self, BLACK, C(3, 7))
-            self.pieces.extend([whiteQueen, whiteKing, blackQueen, blackKing])
-
-        elif bishopTest:
-            whiteBishop = Bishop(self, WHITE, C(4, 4))
-            whiteKing = King(self, WHITE, C(3, 0))
-            blackKing = King(self, BLACK, C(3, 7))
-            self.pieces.extend([whiteBishop, whiteKing, blackKing])
-
-        elif knightTest:
-            whiteKnight = Knight(self, WHITE, C(4, 4))
-            whiteKing = King(self, WHITE, C(3, 0))
-            blackKing = King(self, BLACK, C(3, 7))
-            self.pieces.extend([whiteKnight, whiteKing, blackKing])
-
-        elif promotion:
-            pawnToPromote = Pawn(self, WHITE, C(1, 6))
-            pawnToPromote.movesMade = 1
-            kingWhite = King(self, WHITE, C(4, 0))
-            kingBlack = King(self, BLACK, C(3, 2))
-            self.pieces.extend([pawnToPromote, kingWhite, kingBlack])
-
-        elif takeTest:
-            pawnToTake = Pawn(self, BLACK, C(4, 4))
-            whiteQueen = Queen(self, WHITE, C(2, 4))
-            whiteBishop = Bishop(self, WHITE, C(2, 2))
-            whiteRook = Rook(self, WHITE, C(4, 2))
-            whiteKing = King(self, WHITE, C(1, 0))
-            blackKing = King(self, BLACK, C(1, 7))
-            self.pieces.extend(
-                [pawnToTake,
-                 whiteQueen,
-                 whiteBishop,
-                 whiteRook,
-                 whiteKing,
-                 blackKing])
-
-        elif castle:
-            kingWhite = King(self, WHITE, C(3, 0))
-            kingBlack = King(self, BLACK, C(4, 7))
-            kingSideRook = Rook(self, WHITE, C(0, 0))
-            queenSideRook = Rook(self, WHITE, C(7, 0))
-            self.pieces.extend(
-                [kingWhite, kingBlack, kingSideRook, queenSideRook])
+                self.pieces.append(TikTokFan(self, BLACK, C(x, 6)))
+                self.pieces.append(TikTokFan(self, WHITE, C(x, 1)))
+            self.pieces.extend([SuicideBomber(self, WHITE, C(0, 0)),
+                                PornAddict(self, WHITE, C(2, 0)),
+                                AngryFeminist(self, WHITE, C(3, 0)),
+                                Helicopter(self, WHITE, C(4, 0)),
+                                AbusiveFather(self, WHITE, C(5, 0)),
+                                SuicideBomber(self, WHITE, C(7, 0))])
 
     def __str__(self):
         return self.wrapStringRep(self.makeStringRep(self.pieces))
 
     def undoLastMove(self):
         lastMove, pieceTaken = self.history.pop()
+        if lastMove.whip:
+            self.addPieceToPosition(pieceTaken, lastMove.specialPos)
+            if pieceTaken.side == WHITE:
+                self.points += pieceTaken.value
+            if pieceTaken.side == BLACK:
+                self.points -= pieceTaken.value
+            self.pieces.append(pieceTaken)
+            lastMove.piece.movesMade -= 1
 
-        if lastMove.castle:
-            king = lastMove.piece
-            rook = lastMove.specialMovePiece
-
-            self.movePieceToPosition(king, lastMove.oldPos)
-            self.movePieceToPosition(rook, lastMove.rookMove.oldPos)
-
-            king.movesMade -= 1
-            rook.movesMade -= 1
-
-        elif lastMove.promotion:
-            pawnPromoted = lastMove.piece
-            promotedPiece = self.pieceAtPosition(lastMove.newPos)
-            if pieceTaken:
-                if pieceTaken.side == WHITE:
-                    self.points += pieceTaken.value
-                if pieceTaken.side == BLACK:
-                    self.points -= pieceTaken.value
-                self.addPieceToPosition(pieceTaken, lastMove.newPos)
-                self.pieces.append(pieceTaken)
-            self.pieces.remove(promotedPiece)
-            self.pieces.append(pawnPromoted)
-            if pawnPromoted.side == WHITE:
-                self.points -= promotedPiece.value - 1
-            elif pawnPromoted.side == BLACK:
-                self.points += promotedPiece.value - 1
-            pawnPromoted.movesMade -= 1
+        elif lastMove.cripple:
+            piece = lastMove.piece
+            self.addPieceToPosition(piece, lastMove.oldPos)
+            if lastMove.northPiece:
+                self.pieces.remove(self.pieceAtPosition(lastMove.northPiece.position))
+                self.pieces.append(lastMove.northPiece))
+            elif lastMove.southPiece:
+                self.pieces.remove(self.pieceAtPosition(lastMove.southPiece.position))
+                self.pieces.append(lastMove.southPiece))
+            elif lastMove.eastPiece:
+                self.pieces.remove(self.pieceAtPosition(lastMove.eastPiece.position))
+                self.pieces.append(lastMove.eastPiece))
+            elif lastMove.westPiece:
+                self.pieces.remove(self.pieceAtPosition(lastMove.westPiece.position))
+                self.pieces.append(lastMove.westPiece))
 
         else:
             pieceToMoveBack = lastMove.piece
@@ -155,6 +77,9 @@ class Board:
                 self.addPieceToPosition(pieceTaken, lastMove.newPos)
                 self.pieces.append(pieceTaken)
             pieceToMoveBack.movesMade -= 1
+        for piece in self.pieces:
+            if piece.stringRep == 'A' and piece.waitTime != 0:
+                piece.waitTime -= 1
         self.movesMade -= 1
         self.currentSide = not self.currentSide
 
@@ -198,9 +123,9 @@ class Board:
 
     def wrapStringRep(self, stringRep):
         sRep = '\n'.join(
-            ['   a b c d e f g h   ', ' ' * 21] +
-            ['%d  %s  %d' % (8 - r, s.strip(), 8 - r)
-               for r, s in enumerate(stringRep.split('\n'))] +
+            ['   a b c d e f g h   ', ' ' * 21]
+            + ['%d  %s  %d' % (8 - r, s.strip(), 8 - r)
+             for r, s in enumerate(stringRep.split('\n'))] +
             [' ' * 21, '   a b c d e f g h   ']
         ).rstrip()
         return sRep
@@ -221,8 +146,9 @@ class Board:
                      C(1, 1), C(1, -1), C(-1, 1), C(0, -1)]
         for movement in movements:
             pieceAtPos = self.pieceAtPosition(pos + movement)
-            if pieceAtPos.stringRep == 'F' and pieceAtPos.side != side:
-                return False
+            if pieceAtPos:
+                if pieceAtPos.stringRep == 'F' and pieceAtPos.side != side:
+                    return False
         return True
 
     def scanForTikTok(self, side, pos):
@@ -230,10 +156,10 @@ class Board:
         i = 0
         for movement in movements:
             pieceAtPos = self.pieceAtPosition(pos + movement)
-            if pieceAtPos.stringRep == 't' and pieceAtPos.side == side:
-                i += 1
+            if pieceAtPos:
+                if pieceAtPos.stringRep == 't' and pieceAtPos.side == side:
+                    i += 1
         return i + 1
-
 
     def movePieceToPosition(self, piece, pos):
         piece.position = pos
@@ -250,8 +176,10 @@ class Board:
             for cripplePos in [C(0, 1), C(1, 0), C(-1, 0), C(0, -1)]:
                 pieceAtCripplePos = self.pieceAtPosition(newPos + cripplePos)
                 if pieceAtCripplePos and pieceAtCripplePos.side != self.side:
-                    self.pieces.remove(pieceAtCripplePos)
-                    self.pieces.append(TikTokFan(self, self.side, newPos + cripplePos))
+                    if not pieceAtCripplePos.stringRep in ['H', 't']:
+                        self.pieces.remove(pieceAtCripplePos)
+                        self.pieces.append(
+                            TikTokFan(self, self.side, newPos + cripplePos))
             for piece in self.pieces:
                 if piece.stringRep == 'A':
                     piece.waitTime -= 1
@@ -314,16 +242,19 @@ class Board:
     def testIfLegalBoard(self, side):
         for move in self.getAllMovesUnfiltered(side):
             pieceToTake = move.pieceToCapture
-            if pieceToTake and pieceToTake.stringRep == 'K':
+            if pieceToTake and pieceToTake.stringRep == 'F':
                 return False
         return True
 
     def moveIsLegal(self, move):
         side = move.piece.side
-        self.makeMove(move)
-        isLegal = self.testIfLegalBoard(not side)
-        self.undoLastMove()
-        return isLegal
+        if move.piece.stringRep != 'S' and move.pieceToCapture and move.pieceToCapture.stringRep != 'S':
+            self.makeMove(move)
+            isLegal = self.testIfLegalBoard(not side)
+            self.undoLastMove()
+            return isLegal
+        else:
+            return True
 
     def getAllMovesLegal(self, side):
         unfilteredMoves = list(self.getAllMovesUnfiltered(side))

@@ -9,10 +9,15 @@ class Move:
         self.castle = False
         self.promotion = False
         self.cripple = False
+        self.northPiece = None
+        self.southPiece = None
+        self.eastPiece = None
+        self.westPiece = None
         self.whip = False
         self.piece = piece
         self.oldPos = piece.position
         self.newPos = newPos
+        self.specialPos = None
         self.pieceToCapture = pieceToCapture
         self.specialMovePiece = None
         self.rookMove = None

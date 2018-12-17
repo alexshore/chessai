@@ -3,12 +3,12 @@ import random
 from getpass import *
 
 import Database as DB
-from OddBoard import Board
 from Coordinate import Coordinate as C
-from OddParser import InputParser
+from OddBoard import Board
 from OddMove import Move
-from OddPieces import (AbusiveFather, Feminist, Helicopter, PornAddict,
-                       SuicideBomber, Piece)
+from OddParser import InputParser
+from OddPieces import (AbusiveFather, AngryFeminist, Helicopter, NeckBeard,
+                       Piece, PornAddict, SuicideBomber, TikTokFan)
 from termcolor import colored as colour
 
 WHITE = True
@@ -89,8 +89,8 @@ def getRandomMove(board, parser):
 
 
 def printPointAdvantage(board):
-    print('Currently, the point difference is: '
-          + str(board.getPointAdvantageOfSide(board.currentSide)))
+    print('Currently, the point difference is: ' +
+          str(board.getPointAdvantageOfSide(board.currentSide)))
 
 
 def makeMove(move, board):
@@ -113,7 +113,8 @@ def printCommandOptions():
 
 
 def startGame(board):
-    parser = InputParser(board, True)
+    whiteParser = InputParser(board, True)
+    blackParser = InputParser(board, False)
     while True:
         consoleClear()
         print(board)
@@ -135,15 +136,15 @@ def startGame(board):
                 printCommandOptions()
                 continue
             elif command == 'l':
-                listMoves(board, parser, False)
+                listMoves(board, whiteParser, False)
                 continue
             elif command == 'll':
-                listMoves(board, parser, True)
+                listMoves(board, whiteParser, True)
                 continue
             elif command == 'quit':
                 return
             else:
-                move = parser.parse(command)
+                move = whiteParser.parse(command)
             if move:
                 makeMove(move, board)
             else:
@@ -157,15 +158,15 @@ def startGame(board):
                 printCommandOptions()
                 continue
             elif command == 'l':
-                listMoves(board, parser, False)
+                listMoves(board, blackParser, False)
                 continue
             elif command == 'll':
-                listMoves(board, parser, True)
+                listMoves(board, blackParser, True)
                 continue
             elif command == 'quit':
                 return
             else:
-                move = parser.parse(command)
+                move = blackParser.parse(command)
             if move:
                 makeMove(move, board)
             else:

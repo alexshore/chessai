@@ -1,5 +1,5 @@
 from Coordinate import Coordinate as C
-from Move import Move
+from OddMove import Move
 
 WHITE = True
 BLACK = False
@@ -79,13 +79,13 @@ class Helicopter(Piece):
 
     def getPossibleMoves(self):
         board = self.board
-        pos = self.positionToHumanCoord
+        pos = self.position
         movements = []
         for x in range(-3, 4):
             for y in range(-3, 4):
                 if not (x == 0 and y == 0):
                     movements.append(C(x, y))
-
+        print(movements)
         for movement in movements:
             newPos = pos + movement
             if board.isValidPos(newPos) and board.notInFeministRange(self.side, newPos):
@@ -139,7 +139,7 @@ class AngryFeminist(Piece):
         for movement in movements:
             newPos = pos + movement
             if board.isValidPos(newPos):
-                pieceAtNewPos = Board.pieceAtPosition(newPos)
+                pieceAtNewPos = board.pieceAtPosition(newPos)
                 if pieceAtNewPos and pieceAtNewPos.stringRep == 'H':
                     return movement
 
@@ -162,7 +162,7 @@ class TikTokFan(Piece):
         if self.board.isValidPos(finalPos) and board.notInFeministRange(self.side, pos):
             if not self.board.pieceAtPosition(finalPos):
                 yield Move(self, finalPos)
-        movement = [C(1, 0), C(-1, 0)]
+        movements = [C(1, 0), C(-1, 0)]
         for movement in movements:
             newPos = pos + movement
             if self.board.isValidPos(newPos):
@@ -171,7 +171,7 @@ class TikTokFan(Piece):
                     yield Move(self, newPos, pieceToCapture=pieceToTake)
 
 
-class NeckBeard(piece):
+class NeckBeard(Piece):
 
     stringRep = 'N'
     value = 5
@@ -207,8 +207,8 @@ class PornAddict(Piece):
                 elif pieceAtNewPos.side != self.side:
                     yield Move(self, newPos, pieceToCapture=pieceAtNewPos)
         movements = [C(1, 1), C(-1, 1)] \
-            if self.side == WHITE else
-        [C(1, -1), C(-1, -1)]
+                     if self.side == WHITE else \
+                    [C(1, -1), C(-1, -1)]
         for movement in movements:
             newPos = pos + movement
             if board.isValidPos(newPos) and board.notInFeministRange(side, newPos):
@@ -232,7 +232,7 @@ class AbusiveFather(Piece):
     value = 3
 
     def __init__(self, board, side, position, movesMade=0, waitTime=0):
-        super(SuicideBomber, self).__init__(board, side, position)
+        super(AbusiveFather, self).__init__(board, side, position)
         self.movesMade = movesMade
         self.waitTime = waitTime
 
@@ -250,6 +250,8 @@ class AbusiveFather(Piece):
                     pieceAtNewPos = self.board.pieceAtPosition(newPos)
                     if not pieceAtNewPos:
                         yield Move(self, newPos)
+                    else:
+                        break
                 else:
                     break
         movements = [C(2, 0), C(2, 1), C(2, 2), C(2, -1), C(2, -2), C(-2, 0), C(-2, 1), C(-2, 2),
@@ -262,7 +264,8 @@ class AbusiveFather(Piece):
                     move = Move(self, pos, pieceToCapture=pieceAtNewPos)
                     move.whip = True
                     yield move
-                    
+
+
 class SuicideBomber(Piece):
 
     stringRep = 'S'
@@ -276,7 +279,7 @@ class SuicideBomber(Piece):
         board = self.board
         pos = self.position
         movements = [C(0, 1), C(1, 0), C(-1, 0)] \
-            if self.side else movements = \
+                     if self.side else \
                     [C(0, -1), C(1, 0), C(-1, 0)]
         for movement in movements:
             newPos = pos + movement
@@ -285,4 +288,20 @@ class SuicideBomber(Piece):
                 if not pieceAtNewPos:
                     yield Move(self, newPos)
                 elif pieceAtNewPos.side != self.side:
-                    yield Move(self, newPos, pieceToCapture=pieceAtNewPos, cripple=True)
+                    move = Move(self, newPos, pieceToCapture=pieceAtNewPos)
+                    move.cripple = True
+                    for cripplePos in [C(0, 1), C(1, 0), C(-1, 0), C(0, -1)]:
+                        pieceAtCripplePos = self.pieceAtPosition(
+                            newPos + cripplePos)
+                        if pieceAtCripplePos:
+                            if pieceAtCripplePos.side != self.side and \
+                                    pieceAtCripplePos.stringRep not in ['H', 't']:
+                                if cripplePos == C(0, 1):
+                                    move.northPiece = pieceAtCripplePos
+                                elif cripplePos == C(1, 0):
+                                    move.eastPiece = pieceAtCripplePos
+                                elif cripplePos == C(-1, 0):
+                                    move.westPiece = pieceAtCripplePos
+                                elif cripplePos == C(0, -1):
+                                    move.southPiece = pieceAtCripplePos
+                    yield move
