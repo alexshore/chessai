@@ -92,6 +92,10 @@ def printPointAdvantage(board):
     print('Currently, the point difference is: ' +
           str(board.getPointAdvantageOfSide(board.currentSide)))
 
+def undoLastTwoMoves(board):
+    if len(board.history) >= 2:
+        board.undoLastMove()
+        board.undoLastMove()
 
 def makeMove(move, board):
     print()
@@ -106,15 +110,21 @@ def printCommandOptions():
     printAllMovesOption = 'll - show all moves'
     quitOption = 'quit - resign'
     moveOption = 'a3a5, c3xa5, 0-0, b7b8=R - make the move'
-    options = [undoOption, printMovesOption, printAllMovesOption,
-               randomMoveOption, quitOption, moveOption, '', ]
+    options = [printMovesOption, printAllMovesOption,
+               quitOption, moveOption, '', ]
     print('\n'.join(options))
     getpass('Press enter to continue.')
 
 
+def printWaitTime(board):
+    for piece in board.pieces:
+        if piece.stringRep == 'A':
+            getpass(f'father wait time: {piece.waitTime}')
+
+
 def startGame(board):
-    whiteParser = InputParser(board, True)
-    blackParser = InputParser(board, False)
+    whiteParser = InputParser(board, WHITE)
+    blackParser = InputParser(board, BLACK)
     while True:
         consoleClear()
         print(board)
@@ -137,6 +147,12 @@ def startGame(board):
                 continue
             elif command == 'l':
                 listMoves(board, whiteParser, False)
+                continue
+            elif command == 'u':
+                undoLastTwoMoves(board)
+                continue
+            elif command == 'test':
+                printWaitTime(board)
                 continue
             elif command == 'll':
                 listMoves(board, whiteParser, True)
@@ -162,6 +178,9 @@ def startGame(board):
                 continue
             elif command == 'll':
                 listMoves(board, blackParser, True)
+                continue
+            elif command == 'test':
+                printWaitTime(board)
                 continue
             elif command == 'quit':
                 return
