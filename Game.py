@@ -1,7 +1,8 @@
+# Importing required python modules.
 import os
 import random
 from getpass import *
-
+# Importing required custom modules.
 import Database as DB
 from AI import AI
 from Bishop import Bishop
@@ -17,12 +18,13 @@ from Queen import Queen
 from Rook import Rook
 from termcolor import colored as colour
 
+# Defines widely used global constants.
 WHITE = True
 BLACK = False
 
 
 def consoleClear():
-    os.system('cls')
+    # A simple function designed to clear the console screen when called.
     os.system('cls')
 
 

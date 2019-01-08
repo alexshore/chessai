@@ -1,21 +1,28 @@
+# Importing required custom modules.
 from Coordinate import Coordinate as C
 from Move import Move
 
+# Defines widely used global constants.
 WHITE = True
 BLACK = False
-X = 0
-Y = 1
 
 
+# Starts the definition of the class 'Piece'.
 class Piece:
 
     def __init__(self, board, side, position, movesMade=0):
+        # Initialising function of the 'InputParser' class. Creates and assigns
+        # given values to the required attributes.
         self.board = board
         self.side = side
         self.position = position
         movesMade = 0
 
     def __str__(self):
+        # Custom function that generates a printable string for whenever
+        # something tries to print the object. It compiles several pieces of
+        # info about the 'Piece' object and formats them together before
+        # returning the string.
         if self.side == WHITE:
             sideString = 'White'
         else:
@@ -27,6 +34,8 @@ class Piece:
                ' - Moves Made: {}'.format(self.movesMade)
 
     def __eq__(self, other):
+        # Custom function that returns a boolean value depending on whether
+        # certain attributes of two objects are the same as each other.
         if self.board == other.board and \
                 self.side == other.side and \
                 self.position == other.position and \
@@ -35,9 +44,11 @@ class Piece:
         return False
 
     def __lt__(self, other):
-        if self.stringRep == 'p' and other.stringRep in ['K', 'Q', 'R', 'B', 'N']:
+        # Custom function to determine whether a specific 'Piece' object is
+        # worth less than another given object. Then returns a boolean value.
+        if self.stringRep == 'p':
             return True
-        elif self.stringRep == 'K' and other.stringRep in ['Q', 'R', 'B', 'N', 'p']:
+        elif self.stringRep == 'K':
             return False
         elif self.stringRep == 'Q':
             return True if other.stringRep == 'K' else False
@@ -49,6 +60,10 @@ class Piece:
             return True if other.stringRep in ['K', 'Q', 'R', 'B'] else False
 
     def movesInDirectionFromPos(self, pos, direction, side):
+        # Function to yield a group of all possible legal and illegal 'Move'
+        # objects from a given 'direction' 'Coordinate' objects to the calling
+        # function. Returns either when it finds a move to take a piece or
+        # after it has finished looping through the algorithm.
         for distance in range(1, 8):
             movement = C(distance * direction[0], distance * direction[1])
             newPos = pos + movement
@@ -56,13 +71,7 @@ class Piece:
                 pieceAtNewPos = self.board.pieceAtPosition(newPos)
                 if pieceAtNewPos is None:
                     yield Move(self, newPos)
-
                 elif pieceAtNewPos is not None:
                     if pieceAtNewPos.side != side:
                         yield Move(self, newPos, pieceToCapture=pieceAtNewPos)
                     return
-
-    def copy(self):
-        cpy = self.__class__(self.board, self.side,
-                             self.position, movesMade=self.movesMade)
-        return cpy

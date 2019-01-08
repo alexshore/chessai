@@ -1,8 +1,9 @@
+# Importing required python modules.
 import datetime as dt
 import os
 import re
 from getpass import getpass
-
+# Importing required custom modules.
 import Database as DB
 from Session import Session
 

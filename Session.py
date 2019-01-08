@@ -15,7 +15,6 @@ class Session:
 
     def consoleClear(self):
         os.system('cls')
-        os.system('cls')
 
     def getInput(self):
         while True:
@@ -124,8 +123,8 @@ class Session:
         self.consoleClear()
         print('- Account Editing. -\n')
         print('1 - Change your password.')
-        print('2 - View security info.')
-        print('3 - Edit account info.')
+        print('2 - View/Edit security info.')
+        print('3 - View/Edit account info.')
         print('\n8 - Reset account.')
         print('9 - Delete account.\n')
         print('0 - Back to main menu.')

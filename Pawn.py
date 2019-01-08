@@ -1,3 +1,4 @@
+# Importing required custom modules.
 from Bishop import Bishop
 from Coordinate import Coordinate as C
 from Knight import Knight
@@ -6,21 +7,31 @@ from Piece import Piece
 from Queen import Queen
 from Rook import Rook
 
+# Defines widely used global constants.
 WHITE = True
 BLACK = False
 
 
+# Starts the definition of the class 'Pawn' using inheritence.
 class Pawn(Piece):
+    # Defines the string representation and the piece value.
     stringRep = 'p'
     value = 1
 
     def __init__(self, board, side, position, movesMade=0):
+        # Initialising function of the 'Pawn' class. Creates and assigns
+        # given values to the required attributes. Does this through both
+        # regular variable assignment and also through inheritance.
         super(Pawn, self).__init__(board, side, position)
         self.movesMade = movesMade
 
     def getPossibleMoves(self):
+        # Function run to yield a group of all possible legal and illegal
+        # 'Move' objects to the calling function. Does this by running through
+        # a list of movements and testing for valid moves before yielding them.
+        # Also handles the promotion of pieces and the ability for a piece to
+        # move two spaces forward on its first move.
         pos = self.position
-
         movement = C(0, 1) if self.side == WHITE else C(0, -1)
         advanceOnePos = pos + movement
         if self.board.isValidPos(advanceOnePos):
