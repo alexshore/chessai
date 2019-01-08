@@ -7,13 +7,14 @@ class Move:
         self.kingSideCastle = False
         self.queenSideCastle = False
         self.castle = False
-        self.promotion = False
+        self.suicide = False
         self.cripple = False
         self.northPiece = None
         self.southPiece = None
         self.eastPiece = None
         self.westPiece = None
         self.whip = False
+        self.waitTimeDecrease = False
         self.piece = piece
         self.oldPos = piece.position
         self.newPos = newPos
@@ -33,7 +34,8 @@ class Move:
         if self.kingSideCastle:
             return '0-0'
 
-        newPosNotation = self.positionToHumanCoord(self.newPos)
+        newPosNotation = self.positionToHumanCoord(self.newPos if not \
+                                        self.specialPos else self.specialPos)
         oldPosNotation = self.positionToHumanCoord(self.oldPos)
         captureNotation = 'x' if self.pieceToCapture else ''
         promotionNotation = '={}'.format(self.specialMovePiece.stringRep) \

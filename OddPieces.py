@@ -85,7 +85,6 @@ class Helicopter(Piece):
             for y in range(-3, 4):
                 if not (x == 0 and y == 0):
                     movements.append(C(x, y))
-        print(movements)
         for movement in movements:
             newPos = pos + movement
             if board.isValidPos(newPos) and board.notInFeministRange(self.side, newPos):
@@ -156,6 +155,10 @@ class TikTokFan(Piece):
     def getPossibleMoves(self):
         board = self.board
         pos = self.position
+        try:
+            special = pos + C(0, 1)
+        except:
+            print(f'type {type(pos)}, pos: {pos}')
         yInc = board.scanForTikTok(self.side, pos)
         movement = C(0, yInc) if self.side == WHITE else C(0, -1 * yInc)
         finalPos = pos + movement
@@ -207,7 +210,7 @@ class PornAddict(Piece):
                 elif pieceAtNewPos.side != self.side:
                     yield Move(self, newPos, pieceToCapture=pieceAtNewPos)
         movements = [C(1, 1), C(-1, 1)] \
-                     if self.side == WHITE else \
+            if self.side == WHITE else \
                     [C(1, -1), C(-1, -1)]
         for movement in movements:
             newPos = pos + movement
@@ -219,7 +222,15 @@ class PornAddict(Piece):
                     if board.isValidPos(nextPos) and board.notInFeministRange(side, nextPos):
                         pieceAtNewPos = board.pieceAtPosition(nextPos)
                         if pieceAtNewPos is None:
-                            yield Move(self, nextPos)
+                            if nextPos[1] in [0, 7]:
+                                move = Move(self, nextPos)
+                                move.suicide = True
+                                for piece in self.pieces:
+                                    if piece.stringRep == 'A' and piece.side != self.side:
+                                        move.specialMovePiece = piece
+                                yield move
+                            else:
+                                yield Move(self, nextPos)
                         elif pieceAtNewPos.side != side:
                             yield Move(self, nextPos, pieceToCapture=pieceAtNewPos)
                 elif pieceAtNewPos.side != side:
@@ -260,9 +271,11 @@ class AbusiveFather(Piece):
             newPos = pos + movement
             if board.isValidPos(newPos) and board.notInFeministRange(self.side, newPos):
                 pieceAtNewPos = board.pieceAtPosition(newPos)
-                if pieceAtNewPos and pieceAtNewPos.side == side and self.waitTime != 0:
+                if pieceAtNewPos and pieceAtNewPos.side != side and \
+                        pieceAtNewPos.stringRep != 'F' and self.waitTime == 0:
                     move = Move(self, pos, pieceToCapture=pieceAtNewPos)
                     move.whip = True
+                    move.specialPos = newPos
                     yield move
 
 
@@ -279,7 +292,7 @@ class SuicideBomber(Piece):
         board = self.board
         pos = self.position
         movements = [C(0, 1), C(1, 0), C(-1, 0)] \
-                     if self.side else \
+            if self.side else \
                     [C(0, -1), C(1, 0), C(-1, 0)]
         for movement in movements:
             newPos = pos + movement
@@ -291,7 +304,7 @@ class SuicideBomber(Piece):
                     move = Move(self, newPos, pieceToCapture=pieceAtNewPos)
                     move.cripple = True
                     for cripplePos in [C(0, 1), C(1, 0), C(-1, 0), C(0, -1)]:
-                        pieceAtCripplePos = self.pieceAtPosition(
+                        pieceAtCripplePos = board.pieceAtPosition(
                             newPos + cripplePos)
                         if pieceAtCripplePos:
                             if pieceAtCripplePos.side != self.side and \
